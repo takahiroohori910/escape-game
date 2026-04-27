@@ -29,3 +29,6 @@ Assets/AssetStoreTools*
 
 # Netlify deploy folder は含める
 !Builds/WebGL/
+
+# Local Netlify folder
+.netlify
