@@ -1,0 +1,61 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #1a1a2e;
+  overflow: hidden;
+  width: 100%; height: 100%;
+  touch-action: none;
+}
+
+#unity-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#unity-canvas {
+  display: block;
+  background: #000;
+}
+
+#unity-loading-bar {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+#unity-logo {
+  width: 154px; height: 130px;
+  background: url('unity-logo-dark.png') no-repeat center / contain;
+  margin: 0 auto 20px;
+}
+
+#unity-progress-bar-empty {
+  width: 240px; height: 18px;
+  background: #333;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+#unity-progress-bar-full {
+  height: 100%;
+  background: linear-gradient(90deg, #7b5ea7, #c8a2c8);
+  transition: width 0.1s;
+  border-radius: 9px;
+}
+
+#unity-footer {
+  position: fixed;
+  bottom: 8px; right: 8px;
+}
+
+#unity-fullscreen-button {
+  width: 38px; height: 38px;
+  background: url('fullscreen-button.png') no-repeat center / contain;
+  cursor: pointer;
+  opacity: 0.6;
+}
+#unity-fullscreen-button:hover { opacity: 1; }

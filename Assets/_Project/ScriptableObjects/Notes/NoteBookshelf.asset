@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
+  m_Name: NoteBookshelf
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
+  noteId: note_bookshelf
+  title: "\u30DA\u30FC\u30B8\u306E\u5207\u308C\u7AEF"
+  content: "\u4E09\u518A\u306E\u672C\u306E\u9806\u756A\u306B\u306F\u610F\u5473\u304C\u3042\u308B\u3002\n\u5199\u771F\u3067\u306F\u5DE6\u304B\u3089
+    \u4E09\u30FB\u4E00\u30FB\u56DB \u3068\n\u4E26\u3093\u3067\u3044\u305F\u3002"

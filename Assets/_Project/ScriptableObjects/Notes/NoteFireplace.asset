@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
+  m_Name: NoteFireplace
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
+  noteId: note_fireplace
+  title: "\u8D70\u308A\u66F8\u304D\u306E\u30E1\u30E2"
+  content: "\u96FB\u8A71\u6A5F\u304C\u58CA\u308C\u3066\u3044\u308B\u3002\n\u53D7\u8A71\u5668\u306E\u30B3\u30FC\u30C9\u3068\u5185\u90E8\u306E\u57FA\u677F\u3055\u3048\n\u63C3\u3048\u3070\u4FEE\u7406\u3067\u304D\u308B\u306F\u305A\u3060\u3002"
