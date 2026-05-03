@@ -41,12 +41,11 @@ namespace EscapeGame.Game
             Debug.Log("[PhoneRepairPuzzle] 電話を修理しました");
         }
 
-        // 修理済みの電話をタップして救助を呼ぶ
+        // 修理済みの電話をタップして鍵を受け取る（Room1クリアへ）
         public void CallForRescue()
         {
             if (!isRepaired) return;
-            OnGameClear.Invoke();
-            GameManager.Instance.TriggerClear();
+            OnGameClear.Invoke(); // Room1ClearManager.GiveKeyにwire済み
         }
 
         private bool HasItem(string itemId)

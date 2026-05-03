@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/ohori/Documents/Claude/EscapeGame/Library/PackageCache/com.gamelovers.mcp-unity@6e5904b0eb78/Server~/build/index.js"
+      ],
+      "env": {}
+    }
+  }
+}

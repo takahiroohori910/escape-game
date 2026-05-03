@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
+  m_Name: NoteDrawerMemo
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
+  noteId: notedrawermemo
+  title: "\u98DF\u5668\u68DA\u306E\u4E0A\u306E\u30E1\u30E2"
+  content: "\u71ED\u53F0\u3000\u5947\u306E\u4F4D\u306B\u706F\u3092\u2500\u2500\n(1,
+    3, 5)\n\n\u8A73\u3057\u304F\u306F\u9320\u524D\u3092\u958B\u3051\u3088"

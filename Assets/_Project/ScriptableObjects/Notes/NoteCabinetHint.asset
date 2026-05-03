@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
+  m_Name: NoteCabinetHint
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
+  noteId: notecabinethint
+  title: "\u71ED\u53F0\u306E\u7BA1\u7406\u66F8"
+  content: "\u5100\u5F0F\u306E\u71ED\u53F0\u306F\u5947\u6570\u306E\u4F4D\u7F6E\u306B\u706B\u3092\u706F\u3059\u3053\u3068\n\n\u25CF\u25CB\u25CF\u25CB\u25CF\n\uFF08\u5DE6\u304B\u30891\u30FB3\u30FB5\u756A\u76EE\uFF09\n\n\u2500\u2500\u7BA1\u7406\u4EBA\u3088\u308A"

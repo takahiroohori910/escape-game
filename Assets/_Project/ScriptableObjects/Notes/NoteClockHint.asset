@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
+  m_Name: NoteClockHint
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
+  noteId: noteclockhint
+  title: "\u6642\u8A08\u53F0\u5EA7\u306E\u523B\u5370"
+  content: "\u96A3\u306E\u9593\u306E\u30B9\u30C6\u30F3\u30C9\u30B0\u30E9\u30B9\u3092\u8AAD\u3081\n\u7D0B\u69D8\u306E\u6570\u3092\u9806\u306B\u8A18\u305B\n\n\u4E00\uFF1A\u8594\u8587\u3000\u4E8C\uFF1A\u5341\u5B57\n\u4E09\uFF1A\u661F\u3000\u3000\u56DB\uFF1A\u83F1\u5F62"

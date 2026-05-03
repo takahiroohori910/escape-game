@@ -32,3 +32,6 @@ Assets/AssetStoreTools*
 
 # Local Netlify folder
 .netlify
+
+# Auto-generated scene snapshot (patterns.md は版管理したいので個別指定)
+.claude/scene-snapshot.md

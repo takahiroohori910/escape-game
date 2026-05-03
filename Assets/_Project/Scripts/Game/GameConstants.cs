@@ -1,27 +1,43 @@
 namespace EscapeGame.Game
 {
     // ゲーム全体で使うフラグID・アイテムIDの定数定義
-    // 文字列の直書きによるタイポを防ぐ
     public static class Flags
     {
-        public const string BookshelfSolved  = "bookshelf_solved";   // 本棚パズル解決
-        public const string DeskSolved       = "desk_solved";        // デスクパズル解決
-        public const string PhoneRepaired    = "phone_repaired";     // 電話修理完了
-        public const string ClockInspected   = "clock_inspected";    // 時計を調べた（デスクヒント解放）
+        // Room1
+        public const string BookshelfSolved  = "bookshelf_solved";
+        public const string DeskSolved       = "desk_solved";
+        public const string PhoneRepaired    = "phone_repaired";
+        public const string ClockInspected   = "clock_inspected";
+        public const string HiddenBookRead   = "hidden_book_read";
+        public const string Room1Cleared     = "room1_cleared";
+        // Room2
+        public const string DisplayCabinetSolved = "display_cabinet_solved";
+        public const string CandelabraSolved     = "candelabra_solved";
+        public const string PortraitSolved       = "portrait_solved";
+        public const string AltarSolved          = "altar_solved";
     }
 
     public static class ItemIds
     {
-        public const string PhoneCord  = "phone_cord";   // 電話の部品①：受話器コード
-        public const string CircuitBoard = "circuit_board"; // 電話の部品②：内部基板
+        public const string PhoneCord    = "phone_cord";
+        public const string CircuitBoard = "circuit_board";
+        public const string RoomKey      = "room_key";
     }
 
     // カメラが映すエリアの定義
     public enum RoomArea
     {
-        Overview,   // 部屋全体（初期視点）
-        Bookshelf,  // 本棚エリア
-        Desk,       // デスクエリア
-        Fireplace,  // 暖炉エリア
+        // Room1
+        Overview,       // 部屋全体（初期視点）
+        Bookshelf,      // 本棚エリア
+        Desk,           // デスクエリア
+        Fireplace,      // 暖炉エリア
+        // Room2
+        Overview2,      // 祭壇の間（全体視点）
+        StainedGlass,   // ステンドグラスエリア
+        DisplayCabinet, // 食器棚エリア
+        Candelabra,     // 燭台エリア
+        Portrait,       // 肖像画エリア
+        Altar,          // 祭壇エリア
     }
 }

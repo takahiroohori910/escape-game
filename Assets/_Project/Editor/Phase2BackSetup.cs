@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
@@ -139,11 +140,13 @@ public class Phase2BackSetup
         btnRt.anchorMin = btnRt.anchorMax = new Vector2(1f, 1f);
         btnRt.anchoredPosition = new Vector2(-80, -30);
 
-        // HintUI に配線
+        // HintUI に配線（AddPersistentListener でシリアライズ）
         var hintUI = managers.GetComponent<HintUI>();
         if (hintUI != null)
         {
-            hintBtn.onClick.AddListener(hintUI.Toggle);
+            hintBtn.onClick.RemoveAllListeners();
+            UnityEventTools.AddPersistentListener(hintBtn.onClick, hintUI.Toggle);
+            EditorUtility.SetDirty(hintBtn.gameObject);
 
             // HintPanel の panel フィールドを確認・配線
             var hintPanelGO = GameObject.Find("HintPanel");

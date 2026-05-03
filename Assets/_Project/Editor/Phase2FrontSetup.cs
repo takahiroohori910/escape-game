@@ -21,7 +21,6 @@ public class Phase2FrontSetup
         SetupNoteUI(canvas, managers);
         SetupItemDetailUI(canvas, managers);
         SetupNoteAssets();
-        SetupNoteObjects();
         AddHoverHighlights();
         WireInventoryUI(managers);
         WireGameClearSubText(managers);
