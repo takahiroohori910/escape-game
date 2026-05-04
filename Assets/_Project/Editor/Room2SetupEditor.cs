@@ -166,10 +166,102 @@ public class Room2SetupEditor : EditorWindow
     static void EnsureCameraPoint(Transform parent, string name, Vector3 pos, Vector3 rot)
     {
         var go = GameObject.Find(name);
-        if (go == null) { go = new GameObject(name); go.transform.SetParent(parent); }
-        go.transform.position = pos;
-        go.transform.eulerAngles = rot;
+        if (go == null)
+        {
+            go = new GameObject(name);
+            go.transform.SetParent(parent);
+            go.transform.position = pos;
+            go.transform.eulerAngles = rot;
+        }
+        else
+        {
+            Debug.Log($"[Room2Setup] {name} は既存値を保持（リセットしたい場合は EscapeGame/Reset Camera Point/{name}）");
+        }
     }
+
+    // ─────────────────────────────────────────
+    // CameraPoint デフォルト値定義（リセット用に共通化）
+    // ─────────────────────────────────────────
+    static (Vector3 pos, Vector3 rot)? GetCameraPointDefault(string name)
+    {
+        switch (name)
+        {
+            case "Overview2Point":      return (R2 + new Vector3(0f, 3.2f, 0.3f), new Vector3(22f, 0f, 0f));
+            case "StainedGlassPoint":   return (R2 + new Vector3(1.5f, 2.5f, 7f), new Vector3(-5f, 90f, 0f));
+            case "DisplayCabinetPoint": return (R2 + new Vector3(-1.11f, 1.59f, 7.01f), new Vector3(0f, 270f, 0f));
+            case "CandelabraPoint":     return (R2 + new Vector3(0f, 2.0f, 1.8f), new Vector3(12f, 0f, 0f));
+            case "PortraitPoint":       return (R2 + new Vector3(0f, 3.84f, 5.9f), new Vector3(9.45f, 0f, 0f));
+            case "AltarPoint":          return (R2 + new Vector3(0f, 2.92f, 5.44f), new Vector3(0f, 0f, 0f));
+            default: return null;
+        }
+    }
+
+    static void ResetCameraPointInternal(string name)
+    {
+        var anchors = GameObject.Find("CameraAnchors");
+        if (anchors == null) { Debug.LogError("CameraAnchorsが見つかりません"); return; }
+        var defaults = GetCameraPointDefault(name);
+        if (!defaults.HasValue) { Debug.LogError($"[Reset] {name} は未知のカメラポイント"); return; }
+
+        var existing = GameObject.Find(name);
+        if (existing != null) Object.DestroyImmediate(existing);
+
+        var go = new GameObject(name);
+        go.transform.SetParent(anchors.transform);
+        go.transform.position = defaults.Value.pos;
+        go.transform.eulerAngles = defaults.Value.rot;
+
+        // RoomViewController の参照を再設定
+        var rvc = Object.FindAnyObjectByType<RoomViewController>();
+        if (rvc != null)
+        {
+            var fieldName = char.ToLower(name[0]) + name.Substring(1);
+            var so = new SerializedObject(rvc);
+            var prop = so.FindProperty(fieldName);
+            if (prop != null) { prop.objectReferenceValue = go.transform; so.ApplyModifiedProperties(); }
+        }
+        Debug.Log($"[Reset] {name} を定数値にリセット: pos={defaults.Value.pos} rot={defaults.Value.rot}");
+    }
+
+    [MenuItem("EscapeGame/Reset Camera Point/All")]
+    public static void ResetAllCameraPoints()
+    {
+        if (!GitGuard.RequireCleanGit("Reset All Camera Points")) return;
+        var anchors = GameObject.Find("CameraAnchors");
+        if (anchors == null) { Debug.LogError("CameraAnchorsが見つかりません"); return; }
+        foreach (var n in new[] { "Overview2Point", "StainedGlassPoint", "DisplayCabinetPoint",
+                                  "CandelabraPoint", "PortraitPoint", "AltarPoint" })
+        {
+            var existing = GameObject.Find(n);
+            if (existing != null) Object.DestroyImmediate(existing);
+        }
+        CreateRoom2CameraPoints();
+        Debug.Log("[Reset] 全カメラポイントを定数値にリセット");
+    }
+
+    [MenuItem("EscapeGame/Reset Camera Point/AltarPoint")]
+    public static void ResetAltarPoint()
+    { if (!GitGuard.RequireCleanGit("Reset AltarPoint")) return; ResetCameraPointInternal("AltarPoint"); }
+
+    [MenuItem("EscapeGame/Reset Camera Point/PortraitPoint")]
+    public static void ResetPortraitPoint()
+    { if (!GitGuard.RequireCleanGit("Reset PortraitPoint")) return; ResetCameraPointInternal("PortraitPoint"); }
+
+    [MenuItem("EscapeGame/Reset Camera Point/DisplayCabinetPoint")]
+    public static void ResetDisplayCabinetPoint()
+    { if (!GitGuard.RequireCleanGit("Reset DisplayCabinetPoint")) return; ResetCameraPointInternal("DisplayCabinetPoint"); }
+
+    [MenuItem("EscapeGame/Reset Camera Point/CandelabraPoint")]
+    public static void ResetCandelabraPoint()
+    { if (!GitGuard.RequireCleanGit("Reset CandelabraPoint")) return; ResetCameraPointInternal("CandelabraPoint"); }
+
+    [MenuItem("EscapeGame/Reset Camera Point/StainedGlassPoint")]
+    public static void ResetStainedGlassPoint()
+    { if (!GitGuard.RequireCleanGit("Reset StainedGlassPoint")) return; ResetCameraPointInternal("StainedGlassPoint"); }
+
+    [MenuItem("EscapeGame/Reset Camera Point/Overview2Point")]
+    public static void ResetOverview2Point()
+    { if (!GitGuard.RequireCleanGit("Reset Overview2Point")) return; ResetCameraPointInternal("Overview2Point"); }
 
     // ─────────────────────────────────────────
     // 3. Room2の3Dジオメトリ（10倍クオリティ版）
@@ -557,88 +649,44 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(portRoot,"Port_FrameMid",    new Vector3(0,0,0.04f),    new Vector3(2.3f,3.1f,0.10f), matGold);
         CreateBox(portRoot,"Port_FrameInner",  new Vector3(0,0,0.08f),    new Vector3(1.95f,2.75f,0.08f),
             GetOrCreateMatURP("Mat_R2_DarkWood",new Color(0.18f,0.10f,0.04f)));
-        // キャンバス
-        CreateBox(portRoot,"Port_Canvas",      new Vector3(0,0.1f,0.12f), new Vector3(1.7f,2.5f,0.02f), matPortrait);
-
-        // 人物シルエット
-        var matFace  = GetOrCreateMatURP("Mat_Port_Face", new Color(0.82f,0.66f,0.52f), 0f, 0.22f);
-        var matRobe  = GetOrCreateMatURP("Mat_Port_Robe", new Color(0.20f,0.10f,0.07f), 0f, 0.06f);
-        var matAcc   = GetOrCreateMatURP("Mat_Port_Acc",  new Color(0.78f,0.62f,0.12f), 0.7f, 0.62f);
-        var matHair  = GetOrCreateMatURP("Mat_Port_Hair", new Color(0.12f,0.08f,0.04f), 0f, 0.08f);
-        // 頭
-        CreateSphere(portRoot,"Port_Head",    new Vector3(0f, 0.80f,0.14f), 0.28f, matFace);
-        // 髪
-        CreateBox(portRoot,"Port_Hair_Top",   new Vector3(0f, 0.92f,0.14f), new Vector3(0.28f,0.10f,0.12f), matHair);
-        CreateBox(portRoot,"Port_Hair_Side1", new Vector3(-0.16f,0.78f,0.14f),new Vector3(0.06f,0.25f,0.10f),matHair);
-        CreateBox(portRoot,"Port_Hair_Side2", new Vector3( 0.16f,0.78f,0.14f),new Vector3(0.06f,0.25f,0.10f),matHair);
-        // 胴体
-        CreateBox(portRoot,"Port_Torso",      new Vector3(0f, 0.20f,0.14f), new Vector3(0.65f,0.65f,0.02f), matRobe);
-        // 衣の広がり
-        CreateBox(portRoot,"Port_Skirt",      new Vector3(0f,-0.60f,0.14f), new Vector3(0.90f,0.65f,0.02f), matRobe);
-        // 衿
-        CreateBox(portRoot,"Port_Collar",     new Vector3(0f, 0.56f,0.15f), new Vector3(0.48f,0.16f,0.02f), matAcc);
-        // 腕（左右）
-        CreateBox(portRoot,"Port_ArmL",       new Vector3(-0.42f,0.10f,0.14f),new Vector3(0.14f,0.60f,0.02f),matRobe);
-        CreateBox(portRoot,"Port_ArmR",       new Vector3( 0.42f,0.10f,0.14f),new Vector3(0.14f,0.60f,0.02f),matRobe);
-
-        // 4紋章（クリッカブル）— ビビッドで大きく強調
-        var symMats = new Material[]
+        // キャンバス（外部画像 Portrait.png を貼る）
+        const string portraitPath = "Assets/_Project/Textures/Portrait.png";
+        AssetDatabase.ImportAsset(portraitPath, ImportAssetOptions.ForceUpdate);
+        var portraitTex = AssetDatabase.LoadAssetAtPath<Texture2D>(portraitPath);
+        if (portraitTex != null)
         {
-            GetOrCreateMatURP("Mat_Sym_Ring",  new Color(1.0f,0.85f,0.15f), 1.0f, 1.0f),   // 鮮やかな金（指輪）
-            GetOrCreateMatURP("Mat_Sym_Sword", new Color(0.85f,0.95f,1.0f), 1.0f, 0.95f),  // 明るい銀（剣）
-            GetOrCreateMatURP("Mat_Sym_Crown", new Color(1.0f,0.5f,0.05f), 1.0f, 0.95f),   // 燃える橙金（王冠）
-            GetOrCreateMatURP("Mat_Sym_Book",  new Color(0.85f,0.15f,0.15f), 0.4f, 0.55f), // 真紅の革（書物）
-        };
+            matPortrait.mainTexture = portraitTex;
+            if (matPortrait.HasProperty("_BaseMap"))   matPortrait.SetTexture("_BaseMap", portraitTex);
+            if (matPortrait.HasProperty("_MainTex"))   matPortrait.SetTexture("_MainTex", portraitTex);
+            if (matPortrait.HasProperty("_BaseColor")) matPortrait.SetColor("_BaseColor", Color.white);
+            matPortrait.color = Color.white;
+            if (matPortrait.HasProperty("_Smoothness")) matPortrait.SetFloat("_Smoothness", 0.05f);
+            if (matPortrait.HasProperty("_Metallic"))   matPortrait.SetFloat("_Metallic", 0f);
+            EditorUtility.SetDirty(matPortrait);
+            AssetDatabase.SaveAssetIfDirty(matPortrait);
+            Debug.Log($"[Room2Setup] 肖像画テクスチャを Mat_R2_Portrait に適用: {portraitPath}");
+        }
+        else Debug.LogWarning($"[Room2Setup] Portrait.png が見つかりません: {portraitPath}");
+        // Quad は単一平面で UV がシンプル（Box の6面分割 UV を回避）
+        // Y=180度回転で法線を +Z 方向（カメラ側）に向ける
+        var portCanvas = CreateQuad(portRoot,"Port_Canvas", new Vector3(0,0.1f,0.12f), new Vector3(1.7f,2.5f,1f), matPortrait);
+        portCanvas.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
+
+        // 4紋章のクリック判定（透明Collider のみ、見た目は画像内に描かれている前提）
         string[] symbolNames = { "指輪","剣","王冠","書物" };
         Vector3[] symbolPositions = {
-            new Vector3(-0.62f, 1.20f,0.18f),
-            new Vector3( 0.62f, 1.20f,0.18f),
-            new Vector3(-0.62f,-1.05f,0.18f),
-            new Vector3( 0.62f,-1.05f,0.18f),
+            new Vector3(-0.55f, 0.95f, 0.14f),  // 左上：指輪
+            new Vector3( 0.55f, 0.95f, 0.14f),  // 右上：剣
+            new Vector3(-0.55f,-0.75f, 0.14f),  // 左下：王冠
+            new Vector3( 0.55f,-0.75f, 0.14f),  // 右下：書物
         };
-        // 紋章プレート（背景の四角い金縁プレート）と内側のシンボル
-        var matSymPlate = GetOrCreateMatURP("Mat_Sym_Plate", new Color(0.10f,0.07f,0.04f), 0.5f, 0.35f);
-        var matSymRim   = GetOrCreateMatURP("Mat_Sym_Rim", new Color(0.85f,0.70f,0.20f), 0.95f, 0.85f);
         for (int i = 0; i < 4; i++)
         {
-            // 大きな金縁プレート（紋章の背景）
-            CreateBox(portRoot,$"Port_Symbol_{i}_Rim",
-                symbolPositions[i] + new Vector3(0,0,-0.02f),
-                new Vector3(0.85f,0.85f,0.05f), matSymRim);
-            // 暗い内側プレート
-            CreateBox(portRoot,$"Port_Symbol_{i}_Plate",
-                symbolPositions[i] + new Vector3(0,0,0.0f),
-                new Vector3(0.72f,0.72f,0.05f), matSymPlate);
-            // メインのシンボルメッシュ（大きくて目立つ）
-            GameObject sym;
-            if (i == 0)
-            {
-                // 指輪: トーラス代わりに大きな金リング（リング外径 + 中央穴）
-                sym = CreateSphere(portRoot,$"Port_Symbol_{i}_{symbolNames[i]}",
-                    symbolPositions[i] + new Vector3(0,0,0.05f), 0.28f, symMats[i]);
-            }
-            else if (i == 1)
-            {
-                // 剣: 縦長
-                sym = CreateBox(portRoot,$"Port_Symbol_{i}_{symbolNames[i]}",
-                    symbolPositions[i] + new Vector3(0,0,0.05f),
-                    new Vector3(0.14f,0.62f,0.08f), symMats[i]);
-            }
-            else if (i == 2)
-            {
-                // 王冠: 横長
-                sym = CreateBox(portRoot,$"Port_Symbol_{i}_{symbolNames[i]}",
-                    symbolPositions[i] + new Vector3(0,0,0.05f),
-                    new Vector3(0.55f,0.32f,0.08f), symMats[i]);
-            }
-            else
-            {
-                // 書物: 厚みのある四角
-                sym = CreateBox(portRoot,$"Port_Symbol_{i}_{symbolNames[i]}",
-                    symbolPositions[i] + new Vector3(0,0,0.05f),
-                    new Vector3(0.45f,0.55f,0.10f), symMats[i]);
-            }
-            AddBoxCollider(sym, new Vector3(2.5f,2.5f,2.5f));
+            var sym = new GameObject($"Port_Symbol_{i}_{symbolNames[i]}");
+            sym.transform.SetParent(portRoot.transform, false);
+            sym.transform.localPosition = symbolPositions[i];
+            var col = sym.AddComponent<BoxCollider>();
+            col.size = new Vector3(0.6f, 0.6f, 0.1f);
             var psi = sym.GetComponent<PortraitSymbolInteractable>() ?? sym.AddComponent<PortraitSymbolInteractable>();
             SetPrivate(psi, "symbolIndex", i);
         }

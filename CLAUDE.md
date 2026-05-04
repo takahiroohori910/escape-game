@@ -28,6 +28,13 @@ Transform・コンポーネント接続の確認はこのファイルを読む�
 
 通常作業ではこのフローはスキップして良い（毎回やるとトークン消費が大きい）。
 
+## Transform 調整の方針
+
+- **カメラポイント** (AltarPoint, PortraitPoint 等): MCP `set_transform` または Align With View で調整。Build Room2 Scene 実行で先祖返りしない（`EnsureCameraPoint` は既存があれば触らない）
+- **ジオメトリ** (祭壇/食器棚/肖像画など): 必ず Editor 定数を書き換えて Build Room2 Scene で反映。MCP で動かすと再生成時に消える
+- **初期値に戻したい時**: `EscapeGame/Reset Camera Point/{name}` メニュー（個別 / All）
+- 詳細は [.claude/unity-patterns.md](.claude/unity-patterns.md) の「Transform 調整の使い分け」を参照
+
 ## Git運用（先祖返り対策）
 
 - **破壊的Editorメニュー実行前は必ずコミット** — `Build Room2 Scene` 等は既存オブジェクトを破壊して再生成するため、コミット直後に実行する

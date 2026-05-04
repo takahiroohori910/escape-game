@@ -256,6 +256,28 @@ private bool IsPointerOver()
 
 ---
 
+## Transform 調整の使い分け（重要）
+
+対象ごとに **どの手段で動かすか** が異なる。これを守らないと「Build Room2 Scene 実行で消える」現象が起きる。
+
+| 対象 | 推奨手段 | 理由 |
+|---|---|---|
+| **CameraPoint** (AltarPoint, PortraitPoint 等) | **MCP set_transform** または **Align With View** | `EnsureCameraPoint` は案A（既存があれば触らない）。Build Room2 Scene 実行で先祖返りしない |
+| **Geometry** (祭壇/食器棚/肖像画など) | **必ず Editor 定数を書き換えて Build Room2 Scene** | Build Room2 が既存を `DestroyImmediate` → 再生成するため、MCP で動かすと消える |
+
+### 「やっぱり初期位置に戻したい」時
+
+CameraPoint だけ `EscapeGame/Reset Camera Point/{name}` メニューで個別リセット可能：
+- `EscapeGame/Reset Camera Point/All`
+- `EscapeGame/Reset Camera Point/AltarPoint` 等
+
+各メニューは GitGuard 経由で破壊的操作扱い（未コミット変更があれば警告）。
+
+### NG パターン
+
+- ❌ ジオメトリ（Cab_Body, Altar_Top 等）を MCP set_transform で動かす → Build Room2 Scene で消える
+- ❌ CameraPoint の Editor 定数を書き換えてビルドしても、既存があれば反映されない（Reset メニュー使用）
+
 ## カメラポイント・オブジェクト配置の調整フロー
 
 数値だけで調整すると繰り返し修正になる。必ず以下の順序を守る：
