@@ -662,15 +662,18 @@ public class Room2SetupEditor : EditorWindow
             matPortrait.color = Color.white;
             if (matPortrait.HasProperty("_Smoothness")) matPortrait.SetFloat("_Smoothness", 0.05f);
             if (matPortrait.HasProperty("_Metallic"))   matPortrait.SetFloat("_Metallic", 0f);
+            // 両面表示にして法線方向に関係なく見えるように
+            if (matPortrait.HasProperty("_Cull")) matPortrait.SetFloat("_Cull", 0f);
+            matPortrait.doubleSidedGI = true;
             EditorUtility.SetDirty(matPortrait);
             AssetDatabase.SaveAssetIfDirty(matPortrait);
             Debug.Log($"[Room2Setup] 肖像画テクスチャを Mat_R2_Portrait に適用: {portraitPath}");
         }
         else Debug.LogWarning($"[Room2Setup] Portrait.png が見つかりません: {portraitPath}");
         // Quad は単一平面で UV がシンプル（Box の6面分割 UV を回避）
-        // Y=180度回転で法線を +Z 方向（カメラ側）に向ける
-        var portCanvas = CreateQuad(portRoot,"Port_Canvas", new Vector3(0,0.1f,0.12f), new Vector3(1.7f,2.5f,1f), matPortrait);
-        portCanvas.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
+        // Z=0.20 でフレーム前面（z=0.12）から押し出して Z-fighting を回避
+        // Quad のデフォルト法線は +Z（カメラ側）なので回転不要
+        CreateQuad(portRoot,"Port_Canvas", new Vector3(0,0.1f,0.20f), new Vector3(1.7f,2.5f,1f), matPortrait);
 
         // 4紋章のクリック判定（透明Collider のみ、見た目は画像内に描かれている前提）
         string[] symbolNames = { "指輪","剣","王冠","書物" };
