@@ -655,25 +655,28 @@ public class Room2SetupEditor : EditorWindow
         var portraitTex = AssetDatabase.LoadAssetAtPath<Texture2D>(portraitPath);
         if (portraitTex != null)
         {
+            // ライティング無視で画像をそのまま表示するため URP Unlit に切替
+            var unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (unlitShader != null) matPortrait.shader = unlitShader;
             matPortrait.mainTexture = portraitTex;
             if (matPortrait.HasProperty("_BaseMap"))   matPortrait.SetTexture("_BaseMap", portraitTex);
             if (matPortrait.HasProperty("_MainTex"))   matPortrait.SetTexture("_MainTex", portraitTex);
             if (matPortrait.HasProperty("_BaseColor")) matPortrait.SetColor("_BaseColor", Color.white);
             matPortrait.color = Color.white;
-            if (matPortrait.HasProperty("_Smoothness")) matPortrait.SetFloat("_Smoothness", 0.05f);
-            if (matPortrait.HasProperty("_Metallic"))   matPortrait.SetFloat("_Metallic", 0f);
             // 両面表示にして法線方向に関係なく見えるように
             if (matPortrait.HasProperty("_Cull")) matPortrait.SetFloat("_Cull", 0f);
             matPortrait.doubleSidedGI = true;
             EditorUtility.SetDirty(matPortrait);
             AssetDatabase.SaveAssetIfDirty(matPortrait);
-            Debug.Log($"[Room2Setup] 肖像画テクスチャを Mat_R2_Portrait に適用: {portraitPath}");
+            Debug.Log($"[Room2Setup] 肖像画テクスチャを Mat_R2_Portrait に適用 (Unlit): {portraitPath}");
         }
         else Debug.LogWarning($"[Room2Setup] Portrait.png が見つかりません: {portraitPath}");
-        // Quad は単一平面で UV がシンプル（Box の6面分割 UV を回避）
-        // Z=0.20 でフレーム前面（z=0.12）から押し出して Z-fighting を回避
-        // Quad のデフォルト法線は +Z（カメラ側）なので回転不要
-        CreateQuad(portRoot,"Port_Canvas", new Vector3(0,0.1f,0.20f), new Vector3(1.7f,2.5f,1f), matPortrait);
+        // Quad の確定値:
+        // - localPosition (0, 0.1, -0.10): Frame3層(z=-0.08～+0.12)の手前に出して隠されない
+        // - localEulerAngles (0, 180, 0): Quadのデフォルト法線+Zを-Z(カメラ側)に向ける
+        // - localScale (2.6, 3.4, 1): FrameOuterサイズと一致でフレーム全面を覆う
+        var portCanvas = CreateQuad(portRoot,"Port_Canvas", new Vector3(0,0.1f,-0.10f), new Vector3(2.6f,3.4f,1f), matPortrait);
+        portCanvas.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
 
         // 4紋章のクリック判定（透明Collider のみ、見た目は画像内に描かれている前提）
         string[] symbolNames = { "指輪","剣","王冠","書物" };

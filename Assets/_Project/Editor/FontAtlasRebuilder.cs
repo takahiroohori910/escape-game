@@ -140,6 +140,53 @@ public static class FontAtlasRebuilder
         Debug.Log($"[FontRebuild] {updated} TMP_Text の Material を更新");
     }
 
+    // Main Camera を PortraitPoint の位置に強制移動（Game View で肖像画確認用）
+    [MenuItem("EscapeGame/Debug/Move MainCamera to PortraitPoint")]
+    public static void MoveMainCameraToPortrait()
+    {
+        var cam = Camera.main != null ? Camera.main.gameObject : GameObject.Find("Main Camera");
+        var pt = GameObject.Find("PortraitPoint");
+        if (cam == null) { Debug.LogError("Main Camera が見つかりません"); return; }
+        if (pt == null) { Debug.LogError("PortraitPoint が見つかりません"); return; }
+        cam.transform.position = pt.transform.position;
+        cam.transform.rotation = pt.transform.rotation;
+        Debug.Log($"[Debug] Main Camera を PortraitPoint へ移動: pos={pt.transform.position} rot={pt.transform.eulerAngles}");
+    }
+
+    // Scene View の Gizmo OFF（肖像画の人物部分を Light gizmo が隠している切り分け用）
+    [MenuItem("EscapeGame/Debug/Toggle Scene Gizmos OFF")]
+    public static void ToggleSceneGizmos()
+    {
+        if (SceneView.lastActiveSceneView != null)
+        {
+            SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
+            Debug.Log($"[Debug] SceneView.drawGizmos = {SceneView.lastActiveSceneView.drawGizmos}");
+            SceneView.lastActiveSceneView.Repaint();
+        }
+    }
+
+    // Mat_R2_Portrait を Unlit Shader に変更（ライティング無視でテクスチャ表示）
+    [MenuItem("EscapeGame/Debug/Switch Portrait Material to Unlit")]
+    public static void SwitchPortraitToUnlit()
+    {
+        var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_R2_Portrait.mat");
+        if (mat == null) { Debug.LogError("Mat_R2_Portrait が見つかりません"); return; }
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Project/Textures/Portrait.png");
+        if (tex == null) { Debug.LogError("Portrait.png が見つかりません"); return; }
+
+        var unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (unlitShader == null) { Debug.LogError("URP Unlit shader が見つかりません"); return; }
+        mat.shader = unlitShader;
+        if (mat.HasProperty("_BaseMap"))   mat.SetTexture("_BaseMap", tex);
+        if (mat.HasProperty("_MainTex"))   mat.SetTexture("_MainTex", tex);
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", Color.white);
+        mat.color = Color.white;
+        if (mat.HasProperty("_Cull")) mat.SetFloat("_Cull", 0f);
+        EditorUtility.SetDirty(mat);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[Debug] Mat_R2_Portrait を Unlit に変更 + Portrait.png 適用 + 両面表示");
+    }
+
     // LiberationSans SDF Material をテンプレートとしてコピーし、Atlas を差し替える
     [MenuItem("EscapeGame/Font/Fix Material From Template")]
     public static void FixMaterialFromTemplate()
