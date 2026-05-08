@@ -679,12 +679,14 @@ public class Room2SetupEditor : EditorWindow
         portCanvas.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
 
         // 4紋章のクリック判定（透明Collider のみ、見た目は画像内に描かれている前提）
+        // Quad は Y180 回転でテクスチャが左右反転して表示されるため、Symbol X は画像位置と逆になる。
+        // Z=-0.14 で Quad(z=-0.10) より手前に出して Ray が確実に当たるようにする。
         string[] symbolNames = { "指輪","剣","王冠","書物" };
         Vector3[] symbolPositions = {
-            new Vector3(-0.55f, 0.95f, 0.14f),  // 左上：指輪
-            new Vector3( 0.55f, 0.95f, 0.14f),  // 右上：剣
-            new Vector3(-0.55f,-0.75f, 0.14f),  // 左下：王冠
-            new Vector3( 0.55f,-0.75f, 0.14f),  // 右下：書物
+            new Vector3( 0.55f, 0.95f,-0.14f),  // 画像左上の指輪 → 画面右上
+            new Vector3(-0.55f, 0.95f,-0.14f),  // 画像右上の剣   → 画面左上
+            new Vector3( 0.55f,-0.75f,-0.14f),  // 画像左下の王冠 → 画面右下
+            new Vector3(-0.55f,-0.75f,-0.14f),  // 画像右下の書物 → 画面左下
         };
         for (int i = 0; i < 4; i++)
         {
