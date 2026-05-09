@@ -140,53 +140,6 @@ public static class FontAtlasRebuilder
         Debug.Log($"[FontRebuild] {updated} TMP_Text の Material を更新");
     }
 
-    // Main Camera を PortraitPoint の位置に強制移動（Game View で肖像画確認用）
-    [MenuItem("EscapeGame/Debug/Move MainCamera to PortraitPoint")]
-    public static void MoveMainCameraToPortrait()
-    {
-        var cam = Camera.main != null ? Camera.main.gameObject : GameObject.Find("Main Camera");
-        var pt = GameObject.Find("PortraitPoint");
-        if (cam == null) { Debug.LogError("Main Camera が見つかりません"); return; }
-        if (pt == null) { Debug.LogError("PortraitPoint が見つかりません"); return; }
-        cam.transform.position = pt.transform.position;
-        cam.transform.rotation = pt.transform.rotation;
-        Debug.Log($"[Debug] Main Camera を PortraitPoint へ移動: pos={pt.transform.position} rot={pt.transform.eulerAngles}");
-    }
-
-    // Scene View の Gizmo OFF（肖像画の人物部分を Light gizmo が隠している切り分け用）
-    [MenuItem("EscapeGame/Debug/Toggle Scene Gizmos OFF")]
-    public static void ToggleSceneGizmos()
-    {
-        if (SceneView.lastActiveSceneView != null)
-        {
-            SceneView.lastActiveSceneView.drawGizmos = !SceneView.lastActiveSceneView.drawGizmos;
-            Debug.Log($"[Debug] SceneView.drawGizmos = {SceneView.lastActiveSceneView.drawGizmos}");
-            SceneView.lastActiveSceneView.Repaint();
-        }
-    }
-
-    // Mat_R2_Portrait を Unlit Shader に変更（ライティング無視でテクスチャ表示）
-    [MenuItem("EscapeGame/Debug/Switch Portrait Material to Unlit")]
-    public static void SwitchPortraitToUnlit()
-    {
-        var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_R2_Portrait.mat");
-        if (mat == null) { Debug.LogError("Mat_R2_Portrait が見つかりません"); return; }
-        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Project/Textures/Portrait.png");
-        if (tex == null) { Debug.LogError("Portrait.png が見つかりません"); return; }
-
-        var unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (unlitShader == null) { Debug.LogError("URP Unlit shader が見つかりません"); return; }
-        mat.shader = unlitShader;
-        if (mat.HasProperty("_BaseMap"))   mat.SetTexture("_BaseMap", tex);
-        if (mat.HasProperty("_MainTex"))   mat.SetTexture("_MainTex", tex);
-        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", Color.white);
-        mat.color = Color.white;
-        if (mat.HasProperty("_Cull")) mat.SetFloat("_Cull", 0f);
-        EditorUtility.SetDirty(mat);
-        AssetDatabase.SaveAssets();
-        Debug.Log($"[Debug] Mat_R2_Portrait を Unlit に変更 + Portrait.png 適用 + 両面表示");
-    }
-
     // LiberationSans SDF Material をテンプレートとしてコピーし、Atlas を差し替える
     [MenuItem("EscapeGame/Font/Fix Material From Template")]
     public static void FixMaterialFromTemplate()
@@ -318,112 +271,6 @@ public static class FontAtlasRebuilder
         Debug.Log($"[FontRebuild] enabled復元: {enabledCount}, font再設定: {matFixed} (全{texts.Length}件)");
     }
 
-    // 特定の TMP の詳細を比較
-    [MenuItem("EscapeGame/Font/Debug_CompareTMPs")]
-    public static void CompareTMPs()
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("=== ItemDetailUI 系（表示されている）===");
-        var visibleNames = new[] { "ItemName", "ItemDesc" };
-        foreach (var name in visibleNames)
-        {
-            foreach (var t in Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-            {
-                if (t.name == name)
-                {
-                    DumpOne(sb, t);
-                    break;
-                }
-            }
-        }
-        sb.AppendLine("\n=== Btn_2/Btn_9 系（表示されていない）===");
-        foreach (var t in Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            if (t.transform.parent?.name == "Btn_2" || t.transform.parent?.name == "Btn_9")
-            {
-                DumpOne(sb, t);
-                break;
-            }
-        }
-        Debug.Log(sb.ToString());
-    }
-
-    static void DumpOne(StringBuilder sb, TMP_Text t)
-    {
-        var canvas = t.GetComponentInParent<Canvas>(true);
-        sb.AppendLine($"[{t.name}] (parent={t.transform.parent?.name})");
-        sb.AppendLine($"  font={t.font?.name} mat={t.fontSharedMaterial?.name}");
-        sb.AppendLine($"  text=\"{t.text}\" color={t.color} fontSize={t.fontSize} alpha={t.alpha}");
-        sb.AppendLine($"  active={t.gameObject.activeInHierarchy} enabled={t.enabled} renderEnabled={t.canvasRenderer.cull == false}");
-        sb.AppendLine($"  rect.sizeDelta={t.rectTransform.sizeDelta} rect.lossyScale={t.rectTransform.lossyScale}");
-        sb.AppendLine($"  canvas={canvas?.name} mode={canvas?.renderMode} sortOrder={canvas?.sortingOrder}");
-    }
-
-    // 表示されている TMP と表示されていない TMP の font/mat を比較
-    [MenuItem("EscapeGame/Font/Debug_DumpTMPGroups")]
-    public static void DumpTMPGroups()
-    {
-        var texts = Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        var groups = new Dictionary<string, (int count, List<string> samples)>();
-        foreach (var t in texts)
-        {
-            var key = $"font={(t.font?.name ?? "null")} mat={(t.fontSharedMaterial?.name ?? "null")}";
-            if (!groups.ContainsKey(key)) groups[key] = (0, new List<string>());
-            var (cnt, samples) = groups[key];
-            groups[key] = (cnt + 1, samples);
-            if (samples.Count < 3 && !string.IsNullOrEmpty(t.text))
-                samples.Add($"  - {t.name}: \"{t.text.Replace("\n", "\\n")}\" (parent={t.transform.parent?.name})");
-        }
-        var sb = new StringBuilder();
-        sb.AppendLine($"=== TMP Groups ({texts.Length} total) ===");
-        foreach (var kv in groups.OrderByDescending(g => g.Value.count))
-        {
-            sb.AppendLine($"[{kv.Value.count}] {kv.Key}");
-            foreach (var s in kv.Value.samples) sb.AppendLine(s);
-        }
-        Debug.Log(sb.ToString());
-    }
-
-    // 全TMP_Textの状態をダンプ（切り分け用）
-    [MenuItem("EscapeGame/Font/Debug_DumpTMPState")]
-    public static void DumpTMPState()
-    {
-        var texts = Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        int withFont = 0, withMat = 0, enabledCnt = 0, withText = 0, alphaZero = 0, scaleZero = 0, inactive = 0;
-        foreach (var t in texts)
-        {
-            if (t.font != null) withFont++;
-            if (t.fontSharedMaterial != null) withMat++;
-            if (t.enabled) enabledCnt++;
-            if (!string.IsNullOrEmpty(t.text)) withText++;
-            if (t.color.a < 0.01f) alphaZero++;
-            if (t.transform.lossyScale.x < 0.01f) scaleZero++;
-            if (!t.gameObject.activeInHierarchy) inactive++;
-        }
-        var sb = new StringBuilder();
-        sb.AppendLine($"=== TMP State Total={texts.Length} ===");
-        sb.AppendLine($"font!=null: {withFont}, mat!=null: {withMat}, enabled: {enabledCnt}, hasText: {withText}");
-        sb.AppendLine($"alpha=0: {alphaZero}, scale=0: {scaleZero}, inactive: {inactive}");
-        // Top 5 sample
-        sb.AppendLine("--- Sample 5 ---");
-        for (int i = 0; i < Mathf.Min(5, texts.Length); i++)
-        {
-            var t = texts[i];
-            sb.AppendLine($"[{t.name}] font={(t.font?.name ?? "null")} mat={(t.fontSharedMaterial?.name ?? "null")} text=\"{t.text?.Replace("\n", "\\n")}\" color={t.color} active={t.gameObject.activeInHierarchy} enabled={t.enabled}");
-        }
-        // TMP Settings
-        sb.AppendLine("--- TMP Settings ---");
-        var defaultFont = TMP_Settings.defaultFontAsset;
-        sb.AppendLine($"defaultFontAsset: {(defaultFont?.name ?? "null")} mat={(defaultFont?.material?.name ?? "null")}");
-        // Canvas
-        sb.AppendLine("--- Canvases ---");
-        foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            sb.AppendLine($"[{canvas.name}] active={canvas.gameObject.activeInHierarchy} enabled={canvas.enabled} renderMode={canvas.renderMode} sortOrder={canvas.sortingOrder}");
-        }
-        Debug.Log(sb.ToString());
-    }
-
     // 正規API + サブアセット永続化版
     [MenuItem("EscapeGame/Font/Create Fresh FontAsset v2")]
     public static void CreateFreshFontAssetV2()
@@ -551,35 +398,6 @@ public static class FontAtlasRebuilder
         }
         AssetDatabase.SaveAssets();
         Debug.Log($"[FontRebuild] {updated} TMP を NotoSansJP_Dynamic に復元");
-    }
-
-    // 切り分け: 全TMPをLiberationSansに切り替え（テキスト表示の検証用）
-    [MenuItem("EscapeGame/Font/Debug_SwitchToLiberation")]
-    public static void SwitchToLiberation()
-    {
-        var liberation = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
-            "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
-        if (liberation == null)
-        {
-            // パッケージ内のフォルダから探す
-            foreach (var guid in AssetDatabase.FindAssets("LiberationSans SDF t:TMP_FontAsset"))
-            {
-                liberation = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetDatabase.GUIDToAssetPath(guid));
-                if (liberation != null) break;
-            }
-        }
-        if (liberation == null) { Debug.LogError("[FontRebuild] LiberationSans SDF が見つかりません"); return; }
-
-        var texts = Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        int updated = 0;
-        foreach (var t in texts)
-        {
-            t.font = liberation;
-            t.fontSharedMaterial = liberation.material;
-            EditorUtility.SetDirty(t);
-            updated++;
-        }
-        Debug.Log($"[FontRebuild] {updated} TMP を LiberationSans に切替（切り分け用）");
     }
 
     // 軽量再構築（既存 Atlas を維持しつつ再読み込み）
