@@ -803,10 +803,11 @@ public class Room2SetupEditor : EditorWindow
         //     new Color(1.0f,0.95f,0.70f), 1.2f, 3.5f);
 
         // Overview → Altar クリックゾーン
+        // Y範囲を祭壇本体の高さに合わせて狭め、肖像画クリック範囲との重なりを最小化
         var altZone = new GameObject("R2_ClickZone_Altar");
         altZone.transform.SetParent(room2Root.transform, false);
-        altZone.transform.localPosition = new Vector3(0f,1.8f,8f);
-        AddBoxCollider(altZone, new Vector3(2.5f,3.5f,2.2f));
+        altZone.transform.localPosition = new Vector3(0f,1.2f,8f);
+        AddBoxCollider(altZone, new Vector3(2.5f,2.2f,2.2f));
         var altCZ = altZone.GetComponent<AreaClickZone>() ?? altZone.AddComponent<AreaClickZone>();
         SetPrivate(altCZ, "targetArea", RoomArea.Altar);
         SetPrivate(altCZ, "requiredFlag", Flags.PortraitSolved);
