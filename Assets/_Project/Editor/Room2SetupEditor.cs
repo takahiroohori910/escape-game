@@ -805,6 +805,8 @@ public class Room2SetupEditor : EditorWindow
         AddBoxCollider(altZone, new Vector3(2.5f,3.5f,2.2f));
         var altCZ = altZone.GetComponent<AreaClickZone>() ?? altZone.AddComponent<AreaClickZone>();
         SetPrivate(altCZ, "targetArea", RoomArea.Altar);
+        SetPrivate(altCZ, "requiredFlag", Flags.PortraitSolved);
+        SetPrivate(altCZ, "blockedMessage", "祭壇には封印が施されている。\nまだ近づかない方が良さそうだ。");
     }
 
     // ─────────────────────────────────────────

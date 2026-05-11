@@ -9,6 +9,8 @@ namespace EscapeGame.Game
     public class AreaClickZone : MonoBehaviour
     {
         [SerializeField] private RoomArea targetArea;
+        [SerializeField] private string requiredFlag = "";
+        [SerializeField] private string blockedMessage = "";
         private Collider col;
 
         private void Awake() => col = GetComponent<Collider>();
@@ -22,6 +24,14 @@ namespace EscapeGame.Game
         private void OnMouseDown()
         {
             if (!RoomViewController.Instance.IsOverview) return;
+
+            if (!string.IsNullOrEmpty(requiredFlag) && !FlagManager.Instance.HasFlag(requiredFlag))
+            {
+                if (!string.IsNullOrEmpty(blockedMessage))
+                    PopupUI.Instance?.Show(blockedMessage);
+                return;
+            }
+
             EscapeGame.Core.AudioManager.Instance?.PlaySE("SE_CameraMove");
             RoomViewController.Instance.MoveTo(targetArea);
         }
