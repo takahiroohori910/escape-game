@@ -445,7 +445,7 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(sgRoot, "SG_FrameInner",  new Vector3(0,0,0.06f), new Vector3(3.6f,4.8f,0.10f), matWood);
         // 暗い背景ガラス
         var sgBG = CreateBox(sgRoot, "SG_Glass", new Vector3(0,0,0.10f), new Vector3(3.3f,4.5f,0.03f),
-                    GetOrCreateMatURP("Mat_R2_Glass", new Color(0.02f,0.02f,0.10f)));
+                    GetOrCreateMatURP("Mat_R2_Glass", new Color(0.10f,0.15f,0.35f), 0f, 0.3f, new Color(0.05f,0.10f,0.25f)));
 
         // ── 発光する紋様パネル（強いEmissive）──
 
