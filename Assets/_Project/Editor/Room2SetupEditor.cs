@@ -290,7 +290,9 @@ public class Room2SetupEditor : EditorWindow
         var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Ceiling.mat")
                           ?? GetOrCreateMatURP("Mat_R2_Ceiling",   new Color(0.85f,0.82f,0.76f), 0f, 0.05f);
         var matWood      = GetOrCreateMatURP("Mat_R2_Wood",      new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
-        var matDarkWood  = GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
+        // 食器棚など暗木材は Room1 のテクスチャ付き Material（worn_planks）を共有
+        var matDarkWood  = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wood_Dark.mat")
+                          ?? GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
         var matGold      = GetOrCreateMatURP("Mat_R2_Gold",      new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matGoldDull  = GetOrCreateMatURP("Mat_R2_GoldDull",  new Color(0.70f,0.55f,0.10f), 0.7f, 0.55f);
         var matStone     = GetOrCreateMatURP("Mat_R2_Stone",     new Color(0.45f,0.40f,0.36f), 0f, 0.12f);
@@ -510,8 +512,14 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_BotPlank",  new Vector3(0f,0.06f,0f),    new Vector3(2.3f,0.14f,0.76f), matDarkWood);
         CreateBox(cabRoot,"Cab_BackPanel", new Vector3(0f,1.4f,-0.30f), new Vector3(2.2f,2.8f,0.10f), matDarkWood);
 
-        // 棚板（中段）
-        CreateBox(cabRoot,"Cab_Shelf",     new Vector3(0f,1.5f,0f),     new Vector3(2.0f,0.06f,0.65f), matDarkWood);
+        // 棚板（3段）
+        CreateBox(cabRoot,"Cab_ShelfUpper", new Vector3(0f,2.05f,0f), new Vector3(2.0f,0.06f,0.65f), matDarkWood);
+        CreateBox(cabRoot,"Cab_ShelfMid",   new Vector3(0f,1.45f,0f), new Vector3(2.0f,0.06f,0.65f), matDarkWood);
+        CreateBox(cabRoot,"Cab_ShelfLower", new Vector3(0f,0.85f,0f), new Vector3(2.0f,0.06f,0.65f), matDarkWood);
+
+        // 上部装飾コーニス
+        CreateBox(cabRoot,"Cab_Cornice",   new Vector3(0f,2.92f,0.05f), new Vector3(2.4f,0.10f,0.85f), matDarkWood);
+        CreateBox(cabRoot,"Cab_CorniceTrim", new Vector3(0f,3.00f,0.05f), new Vector3(2.5f,0.04f,0.90f), matGold);
 
         // 脚（4本）
         var matLeg = GetOrCreateMatURP("Mat_R2_CabLeg", new Color(0.13f,0.07f,0.02f), 0f, 0.18f);
@@ -552,17 +560,33 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_Keyhole",
             new Vector3(0f,1.55f,0.50f), new Vector3(0.08f,0.20f,0.02f), matKeyhole);
 
-        // 棚の中の装飾品
+        // 棚の中の装飾品（3段、各段に多様な食器）
         var matSilver = GetOrCreateMatURP("Mat_R2_Silver", new Color(0.72f,0.72f,0.76f), 0.85f, 0.72f);
         var matCup    = GetOrCreateMatURP("Mat_R2_Cup",    new Color(0.65f,0.60f,0.55f), 0.35f, 0.80f);
         var matBook2  = GetOrCreateMatURP("Mat_R2_Book2",  new Color(0.50f,0.15f,0.10f), 0f, 0.12f);
-        // 上段
-        CreateBox(cabRoot,"Cab_ItemU1", new Vector3(-0.55f,2.25f,-0.05f), new Vector3(0.18f,0.32f,0.18f), matSilver);
-        CreateBox(cabRoot,"Cab_ItemU2", new Vector3( 0.00f,2.20f,-0.05f), new Vector3(0.14f,0.40f,0.14f), matCup);
-        CreateBox(cabRoot,"Cab_ItemU3", new Vector3( 0.55f,2.20f,-0.05f), new Vector3(0.20f,0.30f,0.10f), matBook2);
-        // 下段
-        CreateBox(cabRoot,"Cab_ItemL1", new Vector3(-0.45f,1.15f,-0.05f), new Vector3(0.16f,0.26f,0.16f), matCup);
-        CreateBox(cabRoot,"Cab_ItemL2", new Vector3( 0.45f,1.10f,-0.05f), new Vector3(0.24f,0.28f,0.10f), matBook2);
+        var matPorcelain = GetOrCreateMatURP("Mat_R2_Porcelain", new Color(0.95f,0.92f,0.88f), 0.05f, 0.60f);
+
+        // 上段：ティーセット（ティーポット + 皿 + カップ）
+        CreateSphere(cabRoot,"Cab_Teapot_Body",  new Vector3(-0.55f,2.18f,-0.05f), 0.13f, matPorcelain);
+        CreateBox(cabRoot,"Cab_Teapot_Spout",    new Vector3(-0.78f,2.20f,-0.05f), new Vector3(0.16f,0.05f,0.05f), matPorcelain);
+        CreateCylinder(cabRoot,"Cab_Teapot_Handle", new Vector3(-0.40f,2.20f,-0.05f), new Vector3(0.04f,0.10f,0.04f), matPorcelain);
+        CreateCylinder(cabRoot,"Cab_Plate_U",    new Vector3( 0.00f,2.09f,-0.05f), new Vector3(0.32f,0.02f,0.32f), matPorcelain);
+        CreateCylinder(cabRoot,"Cab_Cup_U",      new Vector3( 0.55f,2.15f,-0.05f), new Vector3(0.10f,0.10f,0.10f), matPorcelain);
+
+        // 中段：銀器（カップ + 銀の壷 + 本）
+        CreateCylinder(cabRoot,"Cab_SilverCup",  new Vector3(-0.55f,1.60f,-0.05f), new Vector3(0.11f,0.18f,0.11f), matSilver);
+        CreateSphere(cabRoot,"Cab_SilverUrn",    new Vector3( 0.00f,1.62f,-0.05f), 0.15f, matSilver);
+        CreateBox(cabRoot,"Cab_BookU1",          new Vector3( 0.55f,1.60f,-0.05f), new Vector3(0.20f,0.28f,0.10f), matBook2);
+
+        // 下段：ワインボトル + 大皿 + 本
+        CreateCylinder(cabRoot,"Cab_WineBottle", new Vector3(-0.55f,1.05f,-0.05f), new Vector3(0.09f,0.32f,0.09f), matBook2);
+        CreateCylinder(cabRoot,"Cab_WineNeck",   new Vector3(-0.55f,1.30f,-0.05f), new Vector3(0.04f,0.10f,0.04f), matBook2);
+        CreateCylinder(cabRoot,"Cab_Plate_L",    new Vector3( 0.00f,0.92f,-0.05f), new Vector3(0.34f,0.02f,0.34f), matPorcelain);
+        CreateBox(cabRoot,"Cab_BookL1",          new Vector3( 0.45f,1.02f,-0.05f), new Vector3(0.22f,0.28f,0.10f), matBook2);
+
+        // 取っ手（金色のノブ、扉中央）
+        CreateSphere(cabRoot,"Cab_Knob_U", new Vector3(0f,2.20f,0.46f), 0.05f, matGold);
+        CreateSphere(cabRoot,"Cab_Knob_L", new Vector3(0f,1.10f,0.46f), 0.05f, matGold);
 
         // Overview → DisplayCabinet クリックゾーン
         var cabZone = new GameObject("R2_ClickZone_Cabinet");
