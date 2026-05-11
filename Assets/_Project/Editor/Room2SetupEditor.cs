@@ -764,14 +764,18 @@ public class Room2SetupEditor : EditorWindow
         // CreateBox(altarRoot,"Altar_CrossGlow_V",new Vector3(0f,3.5f,0.54f),  new Vector3(0.05f,1.35f,0.03f), matCrossGlow);
         // CreateBox(altarRoot,"Altar_CrossGlow_H",new Vector3(0f,3.80f,0.54f), new Vector3(0.67f,0.05f,0.03f), matCrossGlow);
 
-        // 祭壇の錠前（クリッカブル）
+        // 祭壇の入力盤（クリッカブル）：金フレーム + 中央の暗い凹みで「ここに入力する」雰囲気
+        // Z=-0.5 はカメラ側（AltarPoint=Z9.5 から見て手前）に配置
         var altarLockGO = CreateBox(altarRoot,"Altar_Lock",
-            new Vector3(0f,1.42f,0.48f), new Vector3(0.36f,0.26f,0.07f), matGold);
-        AddBoxCollider(altarLockGO, new Vector3(0.55f,0.45f,0.45f));
+            new Vector3(0f,1.7f,-0.5f), new Vector3(0.6f,0.5f,0.1f), matGold);
+        AddBoxCollider(altarLockGO, new Vector3(1f,1f,1f));
         if (altarLockGO.GetComponent<AltarInteractable>() == null)
             altarLockGO.AddComponent<AltarInteractable>();
         if (altarLockGO.GetComponent<AltarPuzzle>() == null)
             altarLockGO.AddComponent<AltarPuzzle>();
+        // 中央の暗い凹み（装飾のみ、クリック判定は親側）
+        CreateBox(altarRoot,"Altar_LockInsert",
+            new Vector3(0f,1.7f,-0.56f), new Vector3(0.45f,0.35f,0.04f), matDarkStone);
 
         // 天板上のロウソク（左右各2本）
         float[] candleXs = { -0.68f, -0.35f, 0.35f, 0.68f };
