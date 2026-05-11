@@ -280,11 +280,15 @@ public class Room2SetupEditor : EditorWindow
         room2Root.transform.position = R2;
 
         // ── マテリアル定義 ──
-        var matWall      = GetOrCreateMatURP("Mat_R2_Wall",      new Color(0.13f,0.10f,0.08f), 0f, 0.06f);
+        // 壁・床・天井は Room1 と同じマテリアルを共有して見た目を揃える
+        var matWall      = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Wall.mat")
+                          ?? GetOrCreateMatURP("Mat_R2_Wall",      new Color(0.22f,0.18f,0.14f), 0f, 0.06f);
         var matWallLight = GetOrCreateMatURP("Mat_R2_WallLight",  new Color(0.18f,0.14f,0.11f), 0f, 0.08f);
-        var matFloor     = GetOrCreateMatURP("Mat_R2_Floor",     new Color(0.07f,0.06f,0.05f), 0f, 0.12f);
+        var matFloor     = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Floor.mat")
+                          ?? GetOrCreateMatURP("Mat_R2_Floor",     new Color(0.28f,0.18f,0.10f), 0f, 0.12f);
         var matFloorTile = GetOrCreateMatURP("Mat_R2_FloorTile", new Color(0.16f,0.13f,0.10f), 0f, 0.20f);
-        var matCeiling   = GetOrCreateMatURP("Mat_R2_Ceiling",   new Color(0.09f,0.07f,0.06f), 0f, 0.05f);
+        var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Ceiling.mat")
+                          ?? GetOrCreateMatURP("Mat_R2_Ceiling",   new Color(0.85f,0.82f,0.76f), 0f, 0.05f);
         var matWood      = GetOrCreateMatURP("Mat_R2_Wood",      new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
         var matDarkWood  = GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
         var matGold      = GetOrCreateMatURP("Mat_R2_Gold",      new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
@@ -344,15 +348,17 @@ public class Room2SetupEditor : EditorWindow
 
         // ── 照明（全体を大幅強化）──
         // 主照明: 部屋中央高部、暖白色で全体を明るく
-        AddPointLight(room2Root, "R2_MainLight",    new Vector3(0f,  4.6f, 6f),   new Color(0.95f,0.88f,0.70f), 6.5f, 24f);
+        // R2_MainLight は天井に白い光ドームが目立つため生成しない（暖炉や蝋燭の暖色光のみで照らす）
+        // AddPointLight(room2Root, "R2_MainLight",    new Vector3(0f,  4.6f, 6f),   new Color(0.95f,0.88f,0.70f), 6.5f, 24f);
         // 入口エリア照明
         AddPointLight(room2Root, "R2_EntryLight",   new Vector3(0f,  3.6f, 1.5f), new Color(0.90f,0.75f,0.50f), 2.5f,  8f);
         // ステンドグラス側の彩色光（神秘的な紫）
-        AddPointLight(room2Root, "R2_SGColorLight", new Vector3(3.2f,2.8f, 7f),   new Color(0.35f,0.10f,0.90f), 3.0f, 10f);
+        AddPointLight(room2Root, "R2_SGColorLight", new Vector3(3.2f,2.8f, 7f),   new Color(0.35f,0.10f,0.90f), 0.8f, 10f);
         // 祭壇エリアの神秘的な青白光
-        AddPointLight(room2Root, "R2_AltarAmbient", new Vector3(0f,  4.0f,10.5f), new Color(0.50f,0.65f,1.00f), 2.5f,  9f);
+        // R2_AltarAmbient は天井に光ドームが出るため非表示
+        // AddPointLight(room2Root, "R2_AltarAmbient", new Vector3(0f,  4.0f,10.5f), new Color(0.85f,0.70f,0.45f), 1.2f,  9f);
         // 奥壁（肖像画側）の暖色光
-        AddPointLight(room2Root, "R2_BackLight",    new Vector3(0f,  3.5f,11.5f), new Color(0.85f,0.70f,0.45f), 2.0f,  7f);
+        AddPointLight(room2Root, "R2_BackLight",    new Vector3(0f,  3.5f,11.5f), new Color(0.85f,0.70f,0.45f), 0.6f,  7f);
 
         Debug.Log("[Room2Setup] Room2ジオメトリ作成完了");
     }
