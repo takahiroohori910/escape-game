@@ -280,14 +280,14 @@ public class Room2SetupEditor : EditorWindow
         room2Root.transform.position = R2;
 
         // ── マテリアル定義 ──
-        // 壁・床・天井は Room1 と同じマテリアルを共有して見た目を揃える
-        var matWall      = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Wall.mat")
+        // 壁・床・天井は Room1 のテクスチャ付き Material（Generated/）を共有して質感を揃える
+        var matWall      = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wall.mat")
                           ?? GetOrCreateMatURP("Mat_R2_Wall",      new Color(0.22f,0.18f,0.14f), 0f, 0.06f);
         var matWallLight = GetOrCreateMatURP("Mat_R2_WallLight",  new Color(0.18f,0.14f,0.11f), 0f, 0.08f);
-        var matFloor     = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Floor.mat")
+        var matFloor     = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Floor.mat")
                           ?? GetOrCreateMatURP("Mat_R2_Floor",     new Color(0.28f,0.18f,0.10f), 0f, 0.12f);
         var matFloorTile = GetOrCreateMatURP("Mat_R2_FloorTile", new Color(0.16f,0.13f,0.10f), 0f, 0.20f);
-        var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Mat_Ceiling.mat")
+        var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Ceiling.mat")
                           ?? GetOrCreateMatURP("Mat_R2_Ceiling",   new Color(0.85f,0.82f,0.76f), 0f, 0.05f);
         var matWood      = GetOrCreateMatURP("Mat_R2_Wood",      new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
         var matDarkWood  = GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
