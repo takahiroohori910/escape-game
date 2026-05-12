@@ -31,6 +31,59 @@ public class Room2SetupEditor : EditorWindow
         Debug.Log("[Room2Setup] 完了！");
     }
 
+    // 食器棚のみ再生成（他の Room2 要素は触らない、Prop_/Food_ プレフィックスの子は保護）
+    [MenuItem("EscapeGame/Setup/Rebuild DisplayCabinet")]
+    public static void RebuildDisplayCabinet()
+    {
+        if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
+
+        var room2Root = GameObject.Find("Room2");
+        if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
+
+        // Pandazole 食器など外部 prefab を一時避難（Prop_/Food_ プレフィックス）
+        var preserved = new System.Collections.Generic.List<(GameObject obj, Vector3 pos, Quaternion rot, Vector3 scale)>();
+        var existing = GameObject.Find("R2_DisplayCabinetRoot");
+        if (existing != null)
+        {
+            var children = new System.Collections.Generic.List<Transform>();
+            foreach (Transform child in existing.transform) children.Add(child);
+            foreach (var child in children)
+            {
+                if (child.name.StartsWith("Prop_") || child.name.StartsWith("Food_"))
+                {
+                    preserved.Add((child.gameObject, child.position, child.rotation, child.localScale));
+                    child.SetParent(null, true);
+                }
+            }
+            Object.DestroyImmediate(existing);
+        }
+        var existingZone = GameObject.Find("R2_ClickZone_Cabinet");
+        if (existingZone != null) Object.DestroyImmediate(existingZone);
+
+        var matDarkWood = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wood_Dark.mat")
+                          ?? GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
+        var matGold     = GetOrCreateMatURP("Mat_R2_Gold",  new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
+        var matStone    = GetOrCreateMatURP("Mat_R2_Stone", new Color(0.45f,0.40f,0.36f), 0f, 0.12f);
+
+        BuildDisplayCabinet(room2Root, matDarkWood, matGold, matStone);
+
+        // 避難していた外部 prefab を新しい R2_DisplayCabinetRoot 配下に戻す
+        var newRoot = GameObject.Find("R2_DisplayCabinetRoot");
+        if (newRoot != null)
+        {
+            foreach (var (obj, pos, rot, scale) in preserved)
+            {
+                obj.transform.SetParent(newRoot.transform, true);
+                obj.transform.position = pos;
+                obj.transform.rotation = rot;
+                obj.transform.localScale = scale;
+            }
+        }
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+        Debug.Log($"[Room2Setup] Rebuild DisplayCabinet 完了（外部prefab {preserved.Count} 個を保護）");
+    }
+
     // ─────────────────────────────────────────
     // 1. ScriptableObjectアセット作成
     // ─────────────────────────────────────────
@@ -499,15 +552,18 @@ public class Room2SetupEditor : EditorWindow
     // ── 食器棚（ディスプレイキャビネット）──
     static void BuildDisplayCabinet(GameObject room2Root, Material matDarkWood, Material matGold, Material matStone)
     {
-        var matGlass = GetOrCreateMatURP("Mat_R2_Glass", new Color(0.35f,0.42f,0.55f), 0.85f, 0.20f);
+        // 食器棚のガラスは透明な Mat_WindowGlass を使用（内部の食器が見えるように）
+        var matGlass = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_WindowGlass.mat")
+                       ?? GetOrCreateMatURP("Mat_R2_Glass", new Color(0.35f,0.42f,0.55f), 0.85f, 0.20f);
 
         var cabRoot = new GameObject("R2_DisplayCabinetRoot");
         cabRoot.transform.SetParent(room2Root.transform, false);
         cabRoot.transform.localPosition = new Vector3(-4.1f, 0f, 7f);
         cabRoot.transform.localEulerAngles = new Vector3(0f, 90f, 0f); // 扉を部屋中心(+X)に向ける
 
-        // 本体
-        CreateBox(cabRoot,"Cab_Body",      new Vector3(0f,1.4f, 0f),    new Vector3(2.2f,2.8f,0.70f), matDarkWood);
+        // 本体（内部空洞化のため Cab_Body は廃止、左右側板で外枠を構成）
+        CreateBox(cabRoot,"Cab_SidePanelL", new Vector3(-1.05f,1.4f, 0f), new Vector3(0.10f,2.8f,0.70f), matDarkWood);
+        CreateBox(cabRoot,"Cab_SidePanelR", new Vector3( 1.05f,1.4f, 0f), new Vector3(0.10f,2.8f,0.70f), matDarkWood);
         CreateBox(cabRoot,"Cab_TopPlank",  new Vector3(0f,2.85f,0f),    new Vector3(2.3f,0.14f,0.76f), matDarkWood);
         CreateBox(cabRoot,"Cab_BotPlank",  new Vector3(0f,0.06f,0f),    new Vector3(2.3f,0.14f,0.76f), matDarkWood);
         CreateBox(cabRoot,"Cab_BackPanel", new Vector3(0f,1.4f,-0.30f), new Vector3(2.2f,2.8f,0.10f), matDarkWood);
@@ -584,9 +640,49 @@ public class Room2SetupEditor : EditorWindow
         CreateCylinder(cabRoot,"Cab_Plate_L",    new Vector3( 0.00f,0.92f,-0.05f), new Vector3(0.34f,0.02f,0.34f), matPorcelain);
         CreateBox(cabRoot,"Cab_BookL1",          new Vector3( 0.45f,1.02f,-0.05f), new Vector3(0.22f,0.28f,0.10f), matBook2);
 
-        // 取っ手（金色のノブ、扉中央）
-        CreateSphere(cabRoot,"Cab_Knob_U", new Vector3(0f,2.20f,0.46f), 0.05f, matGold);
-        CreateSphere(cabRoot,"Cab_Knob_L", new Vector3(0f,1.10f,0.46f), 0.05f, matGold);
+        // 取っ手（凝った金色ノブ、扉中央）：ベース円盤+支柱+装飾球
+        CreateCylinder(cabRoot,"Cab_KnobBase_U", new Vector3(0f,2.20f,0.42f), new Vector3(0.10f,0.02f,0.10f), matGold);
+        CreateCylinder(cabRoot,"Cab_KnobStem_U", new Vector3(0f,2.20f,0.45f), new Vector3(0.025f,0.05f,0.025f), matGold);
+        CreateSphere  (cabRoot,"Cab_Knob_U",     new Vector3(0f,2.20f,0.50f), 0.07f, matGold);
+        CreateCylinder(cabRoot,"Cab_KnobBase_L", new Vector3(0f,1.10f,0.42f), new Vector3(0.10f,0.02f,0.10f), matGold);
+        CreateCylinder(cabRoot,"Cab_KnobStem_L", new Vector3(0f,1.10f,0.45f), new Vector3(0.025f,0.05f,0.025f), matGold);
+        CreateSphere  (cabRoot,"Cab_Knob_L",     new Vector3(0f,1.10f,0.50f), 0.07f, matGold);
+
+        // 4角のコーナーオーナメント（金の装飾球）
+        float[] cornerXs = { -0.96f, 0.96f };
+        float[] cornerYs = {  2.68f, 0.57f };
+        for (int cx = 0; cx < 2; cx++)
+            for (int cy = 0; cy < 2; cy++)
+                CreateSphere(cabRoot, $"Cab_CornerGem_{cx}{cy}",
+                    new Vector3(cornerXs[cx], cornerYs[cy], 0.40f), 0.06f, matGold);
+
+        // フレーム内側の彫刻ライン（細い金縁モール、上下のガラスパネル内側）
+        // 上扉の内側
+        CreateBox(cabRoot,"Cab_FrameInsetTop_U",  new Vector3(0f, 2.58f, 0.38f), new Vector3(1.78f, 0.03f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetBot_U",  new Vector3(0f, 1.73f, 0.38f), new Vector3(1.78f, 0.03f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetLeft_U", new Vector3(-0.90f, 2.155f, 0.38f), new Vector3(0.03f, 0.85f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetRight_U",new Vector3( 0.90f, 2.155f, 0.38f), new Vector3(0.03f, 0.85f, 0.04f), matGold);
+        // 下扉の内側
+        CreateBox(cabRoot,"Cab_FrameInsetTop_L",  new Vector3(0f, 1.53f, 0.38f), new Vector3(1.78f, 0.03f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetBot_L",  new Vector3(0f, 0.67f, 0.38f), new Vector3(1.78f, 0.03f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetLeft_L", new Vector3(-0.90f, 1.10f, 0.38f), new Vector3(0.03f, 0.86f, 0.04f), matGold);
+        CreateBox(cabRoot,"Cab_FrameInsetRight_L",new Vector3( 0.90f, 1.10f, 0.38f), new Vector3(0.03f, 0.86f, 0.04f), matGold);
+
+        // 錠前周辺の装飾彫刻
+        CreateBox(cabRoot,"Cab_LockHaloT", new Vector3(0f, 1.85f, 0.41f), new Vector3(0.55f, 0.04f, 0.03f), matGold);
+        CreateBox(cabRoot,"Cab_LockHaloB", new Vector3(0f, 1.25f, 0.41f), new Vector3(0.55f, 0.04f, 0.03f), matGold);
+
+        // コーニス多層化（既存 Cornice 上下に追加レイヤー）
+        CreateBox(cabRoot,"Cab_CorniceLayer1", new Vector3(0f, 3.04f, 0.05f), new Vector3(2.45f, 0.03f, 0.86f), matDarkWood);
+        CreateBox(cabRoot,"Cab_CorniceLayer2", new Vector3(0f, 3.07f, 0.05f), new Vector3(2.55f, 0.02f, 0.92f), matGold);
+        // コーニス中央の紋章（菱形風）
+        CreateBox(cabRoot,"Cab_CrestPlate", new Vector3(0f, 2.97f, 0.46f), new Vector3(0.18f, 0.12f, 0.02f), matGold);
+        CreateBox(cabRoot,"Cab_CrestGem",   new Vector3(0f, 2.97f, 0.48f), new Vector3(0.06f, 0.06f, 0.02f), matStone);
+
+        // 食器棚内部のライト（食器をガラス越しに見えるように照らす）
+        AddPointLight(cabRoot,"Cab_InnerLight_U", new Vector3(0f,2.30f,0.0f), new Color(1.0f,0.92f,0.75f), 0.15f, 1.5f);
+        AddPointLight(cabRoot,"Cab_InnerLight_M", new Vector3(0f,1.70f,0.0f), new Color(1.0f,0.92f,0.75f), 0.10f, 1.3f);
+        AddPointLight(cabRoot,"Cab_InnerLight_L", new Vector3(0f,1.10f,0.0f), new Color(1.0f,0.92f,0.75f), 0.10f, 1.3f);
 
         // Overview → DisplayCabinet クリックゾーン
         var cabZone = new GameObject("R2_ClickZone_Cabinet");
