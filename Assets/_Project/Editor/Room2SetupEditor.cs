@@ -31,6 +31,30 @@ public class Room2SetupEditor : EditorWindow
         Debug.Log("[Room2Setup] 完了！");
     }
 
+    // ステンドグラスのみ再生成
+    [MenuItem("EscapeGame/Setup/Rebuild StainedGlass")]
+    public static void RebuildStainedGlass()
+    {
+        if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
+
+        var room2Root = GameObject.Find("Room2");
+        if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
+
+        var existing = GameObject.Find("R2_StainedGlassRoot");
+        if (existing != null) Object.DestroyImmediate(existing);
+        var existingZone = GameObject.Find("R2_ClickZone_StainedGlass");
+        if (existingZone != null) Object.DestroyImmediate(existingZone);
+
+        var matWood = GetOrCreateMatURP("Mat_R2_Wood", new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
+
+        // ScriptableObject の参照を取り直す（メニュー実行時は CreateScriptableObjects 呼ばないため）
+        noteStainedGlassPlaque = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteStainedGlassPlaque.asset");
+
+        BuildStainedGlass(room2Root, matWood);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+        Debug.Log("[Room2Setup] Rebuild StainedGlass 完了");
+    }
+
     // 食器棚のみ再生成（他の Room2 要素は触らない、Prop_/Food_ プレフィックスの子は保護）
     [MenuItem("EscapeGame/Setup/Rebuild DisplayCabinet")]
     public static void RebuildDisplayCabinet()
@@ -494,49 +518,33 @@ public class Room2SetupEditor : EditorWindow
         sgRoot.transform.localPosition = new Vector3(4.85f, 3.0f, 7f);
         sgRoot.transform.localEulerAngles = new Vector3(0, -90f, 0);
 
-        // 重厚な石製額縁（二重枠）
+        // 重厚な石製額縁（外枠＋内枠のシンプル構造）
         var matStoneFrame = GetOrCreateMatURP("Mat_SG_StoneFrame", new Color(0.20f,0.16f,0.13f), 0f, 0.10f);
-        CreateBox(sgRoot, "SG_FrameOuter",  Vector3.zero,           new Vector3(4.0f,5.2f,0.18f), matStoneFrame);
-        CreateBox(sgRoot, "SG_FrameInner",  new Vector3(0,0,0.06f), new Vector3(3.6f,4.8f,0.10f), matWood);
-        // 暗い背景ガラス
-        var sgBG = CreateBox(sgRoot, "SG_Glass", new Vector3(0,0,0.10f), new Vector3(3.3f,4.5f,0.03f),
-                    GetOrCreateMatURP("Mat_R2_Glass", new Color(0.10f,0.15f,0.35f), 0f, 0.3f, new Color(0.05f,0.10f,0.25f)));
+        CreateBox(sgRoot, "SG_FrameOuter",  Vector3.zero,           new Vector3(4.0f,2.4f,0.18f), matStoneFrame);
+        CreateBox(sgRoot, "SG_FrameInner",  new Vector3(0,0,0.06f), new Vector3(3.7f,2.1f,0.10f), matWood);
 
-        // ── 発光する紋様パネル（強いEmissive）──
+        // 4連アーチ窓のテクスチャ画像を貼った Quad（肖像画パズルのヒント：左から指輪→剣→王冠→書物）
+        var matWindow = GetOrCreateMatURP("Mat_R2_Window4Arches", Color.white, 0f, 0.1f);
+        var windowTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Project/Textures/Window_4Arches.png");
+        if (windowTex != null)
+        {
+            var unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (unlitShader != null) matWindow.shader = unlitShader;
+            matWindow.mainTexture = windowTex;
+            if (matWindow.HasProperty("_BaseMap"))   matWindow.SetTexture("_BaseMap", windowTex);
+            if (matWindow.HasProperty("_MainTex"))   matWindow.SetTexture("_MainTex", windowTex);
+            if (matWindow.HasProperty("_BaseColor")) matWindow.SetColor("_BaseColor", Color.white);
+            if (matWindow.HasProperty("_Cull"))      matWindow.SetFloat("_Cull", 0f);
+            matWindow.doubleSidedGI = true;
+            EditorUtility.SetDirty(matWindow);
+        }
+        // Quad のデフォルト法線 +Z をカメラ側 (-X 親回転先) に向けるため Y180
+        var sgCanvas = CreateQuad(sgRoot, "SG_Canvas", new Vector3(0, 0, 0.12f), new Vector3(3.6f, 2.0f, 1f), matWindow);
+        sgCanvas.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
 
-        // 薔薇 ×2（鮮やかなピンク）
-        var matRose = GetOrCreateMatURP("Mat_SG_Rose", new Color(0.9f,0.25f,0.55f), 0f,0f, new Color(3.5f,0.6f,1.2f));
-        CreateQuad(sgRoot,"SG_Rose1", new Vector3(-0.90f, 1.35f,0.12f), new Vector3(0.55f,0.55f,1f), matRose);
-        CreateQuad(sgRoot,"SG_Rose2", new Vector3( 0.80f,-0.40f,0.12f), new Vector3(0.55f,0.55f,1f), matRose);
-
-        // 十字 ×3（電気的なシアン）
-        var matCross = GetOrCreateMatURP("Mat_SG_Cross", new Color(0.1f,0.80f,0.95f), 0f,0f, new Color(0.2f,3.0f,4.0f));
-        CreateQuad(sgRoot,"SG_Cross1", new Vector3(-0.90f,-0.40f,0.12f), new Vector3(0.55f,0.55f,1f), matCross);
-        CreateQuad(sgRoot,"SG_Cross2", new Vector3( 0.80f, 1.35f,0.12f), new Vector3(0.55f,0.55f,1f), matCross);
-        CreateQuad(sgRoot,"SG_Cross3", new Vector3( 0.00f, 0.45f,0.12f), new Vector3(0.55f,0.55f,1f), matCross);
-
-        // 星 ×1（眩しいゴールド）
-        var matStar = GetOrCreateMatURP("Mat_SG_Star", new Color(1.0f,0.92f,0.10f), 0f,0f, new Color(5.0f,4.0f,0.2f));
-        CreateQuad(sgRoot,"SG_Star1", new Vector3(-0.90f, 0.45f,0.12f), new Vector3(0.55f,0.55f,1f), matStar);
-
-        // 菱形 ×4（深いブルー）
-        var matDiamond = GetOrCreateMatURP("Mat_SG_Diamond", new Color(0.10f,0.20f,1.0f), 0f,0f, new Color(0.4f,0.8f,5.0f));
-        CreateQuad(sgRoot,"SG_Diamond1", new Vector3( 0.80f,-1.30f,0.12f), new Vector3(0.45f,0.45f,1f), matDiamond);
-        CreateQuad(sgRoot,"SG_Diamond2", new Vector3(-0.90f,-1.30f,0.12f), new Vector3(0.45f,0.45f,1f), matDiamond);
-        CreateQuad(sgRoot,"SG_Diamond3", new Vector3( 0.00f, 1.35f,0.12f), new Vector3(0.45f,0.45f,1f), matDiamond);
-        CreateQuad(sgRoot,"SG_Diamond4", new Vector3( 0.00f,-0.40f,0.12f), new Vector3(0.45f,0.45f,1f), matDiamond);
-
-        // 鉛の仕切り線
-        var matLead = GetOrCreateMatURP("Mat_SG_Lead", new Color(0.06f,0.06f,0.06f));
-        CreateBox(sgRoot,"SG_Lead_H1", new Vector3(0f, 0.92f,0.14f), new Vector3(3.3f,0.06f,0.03f), matLead);
-        CreateBox(sgRoot,"SG_Lead_H2", new Vector3(0f, 0.00f,0.14f), new Vector3(3.3f,0.06f,0.03f), matLead);
-        CreateBox(sgRoot,"SG_Lead_H3", new Vector3(0f,-0.88f,0.14f), new Vector3(3.3f,0.06f,0.03f), matLead);
-        CreateBox(sgRoot,"SG_Lead_V1", new Vector3(-0.42f,0f,0.14f), new Vector3(0.06f,4.5f,0.03f), matLead);
-        CreateBox(sgRoot,"SG_Lead_V2", new Vector3( 0.38f,0f,0.14f), new Vector3(0.06f,4.5f,0.03f), matLead);
-
-        // クリックエリア
-        AddBoxCollider(sgBG, new Vector3(3.3f,4.5f,0.3f));
-        var sgNote = sgBG.GetComponent<NoteInteractable>() ?? sgBG.AddComponent<NoteInteractable>();
+        // クリックエリア（ズーム後にメモ表示）
+        AddBoxCollider(sgCanvas, new Vector3(1f, 1f, 0.3f));
+        var sgNote = sgCanvas.GetComponent<NoteInteractable>() ?? sgCanvas.AddComponent<NoteInteractable>();
         SetPrivate(sgNote, "noteData", noteStainedGlassPlaque);
         SetPrivate(sgNote, "requiredArea", RoomArea.StainedGlass);
 
@@ -544,7 +552,7 @@ public class Room2SetupEditor : EditorWindow
         var sgZone = new GameObject("R2_ClickZone_StainedGlass");
         sgZone.transform.SetParent(room2Root.transform, false);
         sgZone.transform.localPosition = new Vector3(4.5f,2.8f,7f);
-        AddBoxCollider(sgZone, new Vector3(0.5f,4.5f,3.0f));
+        AddBoxCollider(sgZone, new Vector3(0.5f,3.5f,3.0f));
         var sgCZ = sgZone.GetComponent<AreaClickZone>() ?? sgZone.AddComponent<AreaClickZone>();
         SetPrivate(sgCZ, "targetArea", RoomArea.StainedGlass);
     }
