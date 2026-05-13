@@ -49,7 +49,7 @@ public class Room2SetupEditor : EditorWindow
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle = GetOrCreateMatURP("Mat_R2_Candle", new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
-        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(10.0f,4.5f,0.4f));
+        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(6.0f,2.4f,0.16f));
 
         BuildCandelabra(room2Root, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -609,6 +609,11 @@ public class Room2SetupEditor : EditorWindow
 
         // パズル本体：cabRoot に直接付与（旧 Cab_Lock 構造は削除して視界をクリアに）
         var puzzle = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
+        // 解錠時に表示するヒントノートを配線（Rebuild DisplayCabinet 単体でも繋がるように）
+        if (noteCabinetHint == null)
+            noteCabinetHint = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteCabinetHint.asset");
+        if (noteCabinetHint != null) SetPrivate(puzzle, "cabinetHintNote", noteCabinetHint);
+        EditorUtility.SetDirty(puzzle);
 
         // 棚の中：Pandazole 食器プレハブで構成（上段=皿7・中段=カップ4・下段=ボウル2 → 正解 742）
         PlaceCabinetDishes(cabRoot);
@@ -873,30 +878,24 @@ public class Room2SetupEditor : EditorWindow
             CreateBox(candleRoot,$"Candle_{i}_Wick",
                 new Vector3(x,1.93f,0f), new Vector3(0.012f,0.04f,0.012f), matWick);
 
-            // 炎（2層構造 + 個別 Point Light で発光感を強化）
+            // 炎：Sconce（壁付け燭台）と同じ単一スフィア構造 + Sconce と同じ Point Light
             // 親 GameObject: SetActive(false) で炎全体を消灯
             var flame = new GameObject($"Candle_{i}_Flame");
             flame.transform.SetParent(candleRoot.transform, false);
             flame.transform.localPosition = new Vector3(x, 2.00f, 0f);
-            // 外側オレンジ（縦長楕円）
-            var flameOuter = CreateSphere(flame,$"Flame_{i}_Outer",
-                Vector3.zero, 0.10f, matFlame);
-            flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
-            // 内側コア（白っぽく超高輝度）
-            var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
-                new Color(20.0f, 13.0f, 4.0f));
-            var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
-                new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
-            flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
-            // 個別 Point Light（蝋燭周辺を照らす、温かいオレンジ光）
+            // Sconce の Sc_*_Flame と同じ寸法（球 0.08、scale 0.07,0.13,0.07）
+            var flameSphere = CreateSphere(flame,$"Flame_{i}_Outer",
+                Vector3.zero, 0.08f, matFlame);
+            flameSphere.transform.localScale = new Vector3(0.07f, 0.13f, 0.07f);
+            // Point Light（Sconce の Sc_*_Light と同じ設定）
             var flameLightGO = new GameObject($"Flame_{i}_Light");
             flameLightGO.transform.SetParent(flame.transform, false);
             flameLightGO.transform.localPosition = new Vector3(0f, 0.05f, 0f);
             var flameLight = flameLightGO.AddComponent<Light>();
             flameLight.type = LightType.Point;
-            flameLight.color = new Color(1.0f, 0.6f, 0.15f);
-            flameLight.intensity = 1.8f;
-            flameLight.range = 2.4f;
+            flameLight.color = new Color(1.0f, 0.65f, 0.20f);
+            flameLight.intensity = 1.2f;
+            flameLight.range = 4.5f;
             flame.SetActive(false); // 全消灯（パズルで点ける）
 
             // Collider + CandleInteractable
