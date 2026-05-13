@@ -269,7 +269,7 @@ public class Room2SetupEditor : EditorWindow
         {
             case "Overview2Point":      return (R2 + new Vector3(0f, 3.2f, 0.3f), new Vector3(22f, 0f, 0f));
             case "StainedGlassPoint":   return (R2 + new Vector3(1.5f, 2.5f, 7f), new Vector3(-5f, 90f, 0f));
-            case "DisplayCabinetPoint": return (R2 + new Vector3(-1.11f, 1.59f, 7.01f), new Vector3(0f, 270f, 0f));
+            case "DisplayCabinetPoint": return (R2 + new Vector3(-1.10f, 1.75f, 7.01f), new Vector3(-5f, 270f, 0f));
             case "CandelabraPoint":     return (R2 + new Vector3(0f, 2.0f, 1.8f), new Vector3(12f, 0f, 0f));
             case "PortraitPoint":       return (R2 + new Vector3(0f, 3.84f, 5.9f), new Vector3(9.45f, 0f, 0f));
             case "AltarPoint":          return (R2 + new Vector3(0f, 2.92f, 5.44f), new Vector3(0f, 0f, 0f));
@@ -600,39 +600,21 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_GlassUpper", new Vector3(0f,2.18f,0.36f), new Vector3(1.8f,0.90f,0.05f), matGlass);
         CreateBox(cabRoot,"Cab_GlassLower", new Vector3(0f,1.10f,0.36f), new Vector3(1.8f,0.88f,0.05f), matGlass);
 
-        // 金属フレーム
+        // 金属フレーム（中央縦の Cab_FrameHMid は視認性のため削除）
         CreateBox(cabRoot,"Cab_FrameTop",   new Vector3(0f,2.68f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameMid",   new Vector3(0f,1.63f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameBot",   new Vector3(0f,0.57f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameLeft",  new Vector3(-0.96f,1.63f,0.37f), new Vector3(0.09f,2.20f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameRight", new Vector3( 0.96f,1.63f,0.37f), new Vector3(0.09f,2.20f,0.07f), matGold);
-        CreateBox(cabRoot,"Cab_FrameHMid",  new Vector3(0f,1.63f,0.37f),     new Vector3(0.09f,2.20f,0.07f), matGold);
 
-        // 錠前（飾り）— 南京錠形状。新仕様ではクリック不可、扉脇の解錠装置で解く
-        var cabLockGO = CreateBox(cabRoot,"Cab_Lock",
-            new Vector3(0f,1.55f,0.42f), new Vector3(0.42f,0.50f,0.14f), matGold);
-        // 旧 Collider と旧 Interactable が残っていれば除去（クリック不可にする）
-        var oldCol = cabLockGO.GetComponent<BoxCollider>();
-        if (oldCol != null) Object.DestroyImmediate(oldCol);
-        if (cabLockGO.GetComponent<DisplayCabinetPuzzle>() == null)
-            cabLockGO.AddComponent<DisplayCabinetPuzzle>();
-        // シャックル（U字バー部分）
-        CreateBox(cabRoot,"Cab_LockShackleTop",
-            new Vector3(0f,1.86f,0.42f), new Vector3(0.30f,0.06f,0.10f), matGold);
-        CreateBox(cabRoot,"Cab_LockShackleL",
-            new Vector3(-0.13f,1.78f,0.42f), new Vector3(0.06f,0.20f,0.10f), matGold);
-        CreateBox(cabRoot,"Cab_LockShackleR",
-            new Vector3( 0.13f,1.78f,0.42f), new Vector3(0.06f,0.20f,0.10f), matGold);
-        // 鍵穴（黒い縦穴）
-        var matKeyhole = GetOrCreateMatURP("Mat_R2_Keyhole", new Color(0.02f,0.02f,0.02f), 0.4f, 0.15f);
-        CreateBox(cabRoot,"Cab_Keyhole",
-            new Vector3(0f,1.55f,0.50f), new Vector3(0.08f,0.20f,0.02f), matKeyhole);
+        // パズル本体：cabRoot に直接付与（旧 Cab_Lock 構造は削除して視界をクリアに）
+        var puzzle = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
 
         // 棚の中：Pandazole 食器プレハブで構成（上段=皿7・中段=カップ4・下段=ボウル2 → 正解 742）
         PlaceCabinetDishes(cabRoot);
 
         // 扉の右脇に解錠装置（3つのカウンタボタン + 確定/リセットレバー）
-        BuildCabinetUnlockDevice(cabRoot, cabLockGO.GetComponent<DisplayCabinetPuzzle>(), matDarkWood, matGold);
+        BuildCabinetUnlockDevice(cabRoot, puzzle, matDarkWood, matGold);
 
         // 取っ手（凝った金色ノブ、扉中央）：ベース円盤+支柱+装飾球
         CreateCylinder(cabRoot,"Cab_KnobBase_U", new Vector3(0f,2.20f,0.42f), new Vector3(0.10f,0.02f,0.10f), matGold);
@@ -661,10 +643,6 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_FrameInsetBot_L",  new Vector3(0f, 0.67f, 0.38f), new Vector3(1.78f, 0.03f, 0.04f), matGold);
         CreateBox(cabRoot,"Cab_FrameInsetLeft_L", new Vector3(-0.90f, 1.10f, 0.38f), new Vector3(0.03f, 0.86f, 0.04f), matGold);
         CreateBox(cabRoot,"Cab_FrameInsetRight_L",new Vector3( 0.90f, 1.10f, 0.38f), new Vector3(0.03f, 0.86f, 0.04f), matGold);
-
-        // 錠前周辺の装飾彫刻
-        CreateBox(cabRoot,"Cab_LockHaloT", new Vector3(0f, 1.85f, 0.41f), new Vector3(0.55f, 0.04f, 0.03f), matGold);
-        CreateBox(cabRoot,"Cab_LockHaloB", new Vector3(0f, 1.25f, 0.41f), new Vector3(0.55f, 0.04f, 0.03f), matGold);
 
         // コーニス多層化（既存 Cornice 上下に追加レイヤー）
         CreateBox(cabRoot,"Cab_CorniceLayer1", new Vector3(0f, 3.04f, 0.05f), new Vector3(2.45f, 0.03f, 0.86f), matDarkWood);
@@ -700,28 +678,36 @@ public class Room2SetupEditor : EditorWindow
             return;
         }
 
-        // 上段（y≈2.10、Cab_ShelfUpper の上）：皿 7 枚を1列に並べる
-        // 棚内寸 x: -0.90〜+0.90、step=0.27 でも余裕がある（皿スケール 0.4 想定）
-        for (int i = 0; i < 7; i++)
-        {
-            float x = -0.84f + i * 0.28f;
-            var plate = (GameObject)PrefabUtility.InstantiatePrefab(platePrefab, cabRoot.transform);
-            plate.name = $"Cab_Dish_Plate_{i}";
-            plate.transform.localPosition = new Vector3(x, 2.12f, -0.05f);
-            plate.transform.localScale = Vector3.one * 0.4f;
-        }
-
-        // 中段（y≈1.52）：カップ 4 個を1列に並べる
+        // 上段（y≈2.12）：皿7枚を2つの山に積む（左4枚 + 右3枚）
+        // 1枚あたり厚み 0.04 で十分視認可能
+        const float plateThickness = 0.04f;
+        const float plateScale = 0.4f;
         for (int i = 0; i < 4; i++)
         {
-            float x = -0.60f + i * 0.40f;
+            var plate = (GameObject)PrefabUtility.InstantiatePrefab(platePrefab, cabRoot.transform);
+            plate.name = $"Cab_Dish_Plate_L_{i}";
+            plate.transform.localPosition = new Vector3(-0.40f, 2.12f + i * plateThickness, -0.05f);
+            plate.transform.localScale = Vector3.one * plateScale;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            var plate = (GameObject)PrefabUtility.InstantiatePrefab(platePrefab, cabRoot.transform);
+            plate.name = $"Cab_Dish_Plate_R_{i}";
+            plate.transform.localPosition = new Vector3(0.40f, 2.12f + i * plateThickness, -0.05f);
+            plate.transform.localScale = Vector3.one * plateScale;
+        }
+
+        // 中段（y≈1.52）：カップ4個を左右ペアで配置（2+2）
+        float[] cupXs = { -0.55f, -0.20f, 0.20f, 0.55f };
+        for (int i = 0; i < 4; i++)
+        {
             var cup = (GameObject)PrefabUtility.InstantiatePrefab(cupPrefab, cabRoot.transform);
             cup.name = $"Cab_Dish_Cup_{i}";
-            cup.transform.localPosition = new Vector3(x, 1.52f, -0.05f);
+            cup.transform.localPosition = new Vector3(cupXs[i], 1.52f, -0.05f);
             cup.transform.localScale = Vector3.one * 0.5f;
         }
 
-        // 下段（y≈0.92）：ボウル 2 個を並べる
+        // 下段（y≈0.92）：ボウル2個
         for (int i = 0; i < 2; i++)
         {
             float x = -0.30f + i * 0.60f;
@@ -1174,13 +1160,14 @@ public class Room2SetupEditor : EditorWindow
     // ─────────────────────────────────────────
     static void WireRoom2UIs()
     {
+        // DisplayCabinetPuzzle は cabRoot に直接付与される（旧 Cab_Lock 構造は廃止）
         var cabinet = Object.FindAnyObjectByType<DisplayCabinetPuzzle>();
         if (cabinet == null)
         {
-            var cabLock = GameObject.Find("Cab_Lock");
-            if (cabLock != null)
-                cabinet = cabLock.GetComponent<DisplayCabinetPuzzle>() ?? cabLock.AddComponent<DisplayCabinetPuzzle>();
-            else Debug.LogWarning("[Room2Setup] Cab_Lockが見つかりません");
+            var cabRoot = GameObject.Find("R2_DisplayCabinetRoot");
+            if (cabRoot != null)
+                cabinet = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
+            else Debug.LogWarning("[Room2Setup] R2_DisplayCabinetRoot が見つかりません");
         }
         if (cabinet != null) { SetPrivate(cabinet, "cabinetHintNote", noteCabinetHint); EditorUtility.SetDirty(cabinet); }
 
