@@ -269,7 +269,7 @@ public class Room2SetupEditor : EditorWindow
         {
             case "Overview2Point":      return (R2 + new Vector3(0f, 3.2f, 0.3f), new Vector3(22f, 0f, 0f));
             case "StainedGlassPoint":   return (R2 + new Vector3(1.5f, 2.5f, 7f), new Vector3(-5f, 90f, 0f));
-            case "DisplayCabinetPoint": return (R2 + new Vector3(-1.10f, 1.75f, 7.01f), new Vector3(-5f, 270f, 0f));
+            case "DisplayCabinetPoint": return (R2 + new Vector3(-1.50f, 2.20f, 7.01f), new Vector3(15f, 270f, 0f));
             case "CandelabraPoint":     return (R2 + new Vector3(0f, 2.0f, 1.8f), new Vector3(12f, 0f, 0f));
             case "PortraitPoint":       return (R2 + new Vector3(0f, 3.84f, 5.9f), new Vector3(9.45f, 0f, 0f));
             case "AltarPoint":          return (R2 + new Vector3(0f, 2.92f, 5.44f), new Vector3(0f, 0f, 0f));
@@ -597,15 +597,15 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_Leg_BR",  new Vector3( 0.95f,-0.25f,-0.30f), new Vector3(0.11f,0.50f,0.11f), matLeg);
 
         // ガラス扉（上下2パネル）
-        CreateBox(cabRoot,"Cab_GlassUpper", new Vector3(0f,2.18f,0.36f), new Vector3(1.8f,0.90f,0.05f), matGlass);
-        CreateBox(cabRoot,"Cab_GlassLower", new Vector3(0f,1.10f,0.36f), new Vector3(1.8f,0.88f,0.05f), matGlass);
+        // ガラスは中央枠が無くなったため1枚に統合（上下を覆う大きな1枚ガラス）
+        CreateBox(cabRoot,"Cab_GlassFront", new Vector3(0f,1.62f,0.36f), new Vector3(1.8f,2.10f,0.05f), matGlass);
 
-        // 金属フレーム（中央縦の Cab_FrameHMid は視認性のため削除）
+        // 金属フレーム（横の Cab_FrameMid は中段を隠すため削除、縦の Cab_FrameHMid は左右分けに残す）
         CreateBox(cabRoot,"Cab_FrameTop",   new Vector3(0f,2.68f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
-        CreateBox(cabRoot,"Cab_FrameMid",   new Vector3(0f,1.63f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameBot",   new Vector3(0f,0.57f,0.37f),     new Vector3(1.90f,0.09f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameLeft",  new Vector3(-0.96f,1.63f,0.37f), new Vector3(0.09f,2.20f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameRight", new Vector3( 0.96f,1.63f,0.37f), new Vector3(0.09f,2.20f,0.07f), matGold);
+        CreateBox(cabRoot,"Cab_FrameHMid",  new Vector3(0f,1.63f,0.37f),     new Vector3(0.09f,2.20f,0.07f), matGold);
 
         // パズル本体：cabRoot に直接付与（旧 Cab_Lock 構造は削除して視界をクリアに）
         var puzzle = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
