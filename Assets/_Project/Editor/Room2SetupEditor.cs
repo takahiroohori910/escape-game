@@ -49,7 +49,7 @@ public class Room2SetupEditor : EditorWindow
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle = GetOrCreateMatURP("Mat_R2_Candle", new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
-        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(6.0f,2.4f,0.16f));
+        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(10.0f,4.0f,0.3f));
 
         BuildCandelabra(room2Root, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -381,7 +381,7 @@ public class Room2SetupEditor : EditorWindow
         var matPortrait  = GetOrCreateMatURP("Mat_R2_Portrait",  new Color(0.14f,0.09f,0.07f), 0f, 0.05f);
         var matCandle    = GetOrCreateMatURP("Mat_R2_Candle",    new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
         var matFlame     = GetOrCreateMatURP("Mat_R2_Flame",     new Color(1.00f,0.55f,0.05f), 0f, 0.0f,
-                               new Color(6.0f, 2.4f, 0.16f));
+                               new Color(10.0f, 4.0f, 0.3f));
 
         // ── 外壁（石造り、w=10, h=5, local z=0-12）──
         CreateBox(room2Root, "R2_Floor",    new Vector3(0f,-0.1f, 6f), new Vector3(10f,0.20f,12f), matFloor);
@@ -892,7 +892,7 @@ public class Room2SetupEditor : EditorWindow
             flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
             // 内側コア（白っぽく超高輝度、外側の加算で透けて見える）
             var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
-                new Color(12.0f, 8.0f, 2.5f));
+                new Color(20.0f, 13.0f, 4.0f));
             var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
                 new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
             flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
@@ -903,8 +903,8 @@ public class Room2SetupEditor : EditorWindow
             var flameLight = flameLightGO.AddComponent<Light>();
             flameLight.type = LightType.Point;
             flameLight.color = new Color(1.0f, 0.65f, 0.20f);
-            flameLight.intensity = 1.2f;
-            flameLight.range = 4.5f;
+            flameLight.intensity = 1.8f;
+            flameLight.range = 5.5f;
             flame.SetActive(false); // 全消灯（パズルで点ける）
 
             // Collider + CandleInteractable
