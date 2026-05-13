@@ -878,15 +878,21 @@ public class Room2SetupEditor : EditorWindow
             CreateBox(candleRoot,$"Candle_{i}_Wick",
                 new Vector3(x,1.93f,0f), new Vector3(0.012f,0.04f,0.012f), matWick);
 
-            // 炎：Sconce（壁付け燭台）と同じ単一スフィア構造 + Sconce と同じ Point Light
+            // 炎：2層構造（外側オレンジ + 内側ホットコア）+ Sconce と同じ Point Light
             // 親 GameObject: SetActive(false) で炎全体を消灯
             var flame = new GameObject($"Candle_{i}_Flame");
             flame.transform.SetParent(candleRoot.transform, false);
             flame.transform.localPosition = new Vector3(x, 2.00f, 0f);
-            // Sconce の Sc_*_Flame と同じ寸法（球 0.08、scale 0.07,0.13,0.07）
-            var flameSphere = CreateSphere(flame,$"Flame_{i}_Outer",
-                Vector3.zero, 0.08f, matFlame);
-            flameSphere.transform.localScale = new Vector3(0.07f, 0.13f, 0.07f);
+            // 外側オレンジ（縦長楕円）
+            var flameOuter = CreateSphere(flame,$"Flame_{i}_Outer",
+                Vector3.zero, 0.10f, matFlame);
+            flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
+            // 内側コア（白っぽく超高輝度）
+            var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
+                new Color(12.0f, 8.0f, 2.5f));
+            var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
+                new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
+            flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
             // Point Light（Sconce の Sc_*_Light と同じ設定）
             var flameLightGO = new GameObject($"Flame_{i}_Light");
             flameLightGO.transform.SetParent(flame.transform, false);
