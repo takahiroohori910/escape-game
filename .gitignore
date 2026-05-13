@@ -35,3 +35,7 @@ Assets/AssetStoreTools*
 
 # Auto-generated scene snapshot (patterns.md は版管理したいので個別指定)
 .claude/scene-snapshot.md
+
+# 巨大アセットストアパック（Package Manager で再インポート可能なので除外）
+Assets/Furniture Mega Pack/
+Assets/Furniture Mega Pack.meta
