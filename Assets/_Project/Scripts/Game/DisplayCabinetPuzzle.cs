@@ -11,7 +11,7 @@ namespace EscapeGame.Game
         [SerializeField] private int correctTop = 7;
         [SerializeField] private int correctMid = 4;
         [SerializeField] private int correctBot = 2;
-        [SerializeField] private NoteData cabinetHintNote;
+        [SerializeField] private ItemData cabinetHintItem; // 開錠時にインベントリへ追加されるヒントアイテム
 
         private int topCount, midCount, botCount;
         private bool isSolved;
@@ -55,10 +55,10 @@ namespace EscapeGame.Game
                 AudioManager.Instance?.PlaySE("SE_PuzzleSolve");
                 OnSolved?.Invoke();
 
-                if (cabinetHintNote != null)
-                    NoteUI.Instance?.Show(cabinetHintNote);
+                if (cabinetHintItem != null && InventoryManager.Instance != null)
+                    InventoryManager.Instance.AddItem(cabinetHintItem);
 
-                Debug.Log("[DisplayCabinetPuzzle] 解決！燭台ヒントを表示");
+                Debug.Log("[DisplayCabinetPuzzle] 解決！蝋板アイテムを入手");
             }
             else
             {

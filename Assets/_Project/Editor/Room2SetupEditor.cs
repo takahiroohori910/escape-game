@@ -80,6 +80,16 @@ public class Room2SetupEditor : EditorWindow
         Debug.Log("[Room2Setup] Rebuild StainedGlass 完了");
     }
 
+    // ScriptableObject / アイテム類のみ再生成（蝋板 PNG + ItemData 等）
+    [MenuItem("EscapeGame/Setup/Refresh ScriptableObjects")]
+    public static void RefreshScriptableObjectsMenu()
+    {
+        if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
+        CreateScriptableObjects();
+        AssetDatabase.SaveAssets();
+        Debug.Log("[Room2Setup] ScriptableObjects Refresh 完了");
+    }
+
     // 食器棚のみ再生成（破壊的：内部の食器配置や解錠装置も全て再生成される）
     [MenuItem("EscapeGame/Setup/Rebuild DisplayCabinet")]
     public static void RebuildDisplayCabinet()
@@ -117,7 +127,7 @@ public class Room2SetupEditor : EditorWindow
     // ─────────────────────────────────────────
     static NoteData noteHiddenBook, noteCabinetHint, notePortraitSecret,
                     noteClockHint, noteDrawerMemo, noteStainedGlassPlaque;
-    static ItemData itemRoomKey;
+    static ItemData itemRoomKey, itemFlamePattern;
 
     static void CreateScriptableObjects()
     {
@@ -153,6 +163,13 @@ public class Room2SetupEditor : EditorWindow
         itemRoomKey = CreateItem(itemDir, "RoomKey",
             ItemIds.RoomKey, "祭壇の間の鍵",
             "重厚な鉄の鍵。隣の部屋の扉に使えそうだ。");
+
+        // 食器棚解錠で得る「凹凸の蝋板」アイコンを生成し、アイテムを作成（説明文なし）
+        var flameIcon = CreateFlamePatternSprite();
+        itemFlamePattern = CreateItem(itemDir, "FlamePattern",
+            ItemIds.FlamePattern, "蝋板", "");
+        SetPrivate(itemFlamePattern, "icon", flameIcon);
+        EditorUtility.SetDirty(itemFlamePattern);
 
         AssetDatabase.SaveAssets();
         Debug.Log("[Room2Setup] ScriptableObject作成完了");
@@ -190,11 +207,77 @@ public class Room2SetupEditor : EditorWindow
         return item;
     }
 
+    // SaveManager.allItems に該当 ItemData がなければ追加する（既存ループの共通化）
+    static void AddItemIfMissing(SerializedProperty itemsProp, ItemData item, string label)
+    {
+        if (item == null) return;
+        for (int i = 0; i < itemsProp.arraySize; i++)
+            if (itemsProp.GetArrayElementAtIndex(i).objectReferenceValue == item) return;
+        itemsProp.InsertArrayElementAtIndex(itemsProp.arraySize);
+        itemsProp.GetArrayElementAtIndex(itemsProp.arraySize - 1).objectReferenceValue = item;
+        Debug.Log($"[Room2Setup] SaveManager: {label} 追加");
+    }
+
     static void SetPrivate(Object obj, string field, object val)
     {
         var f = obj.GetType().GetField(field,
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         f?.SetValue(obj, val);
+    }
+
+    // 蝋板アイコン（5本のバー：1,3,5番目が高くて赤、2,4番目が低くて白）を PNG として生成し Sprite として返す
+    static Sprite CreateFlamePatternSprite()
+    {
+        const string path = "Assets/_Project/Textures/Icon_FlamePattern.png";
+        const int W = 128, H = 96;
+        var tex = new Texture2D(W, H, TextureFormat.RGBA32, false);
+
+        // 背景：蝋板色（薄いベージュ）
+        var bg = new Color(0.92f, 0.86f, 0.72f, 1f);
+        for (int y = 0; y < H; y++)
+            for (int x = 0; x < W; x++)
+                tex.SetPixel(x, y, bg);
+
+        // 5本のバー
+        int[] barX = { 12, 36, 60, 84, 108 };
+        const int barW = 8;
+        const int tallH = 70, shortH = 28;
+        const int baseY = 12;
+        var tallColor = new Color(0.85f, 0.18f, 0.12f, 1f);   // 赤
+        var shortColor = new Color(0.35f, 0.28f, 0.22f, 1f);  // 暗茶
+        for (int i = 0; i < 5; i++)
+        {
+            bool isTall = (i % 2 == 0);
+            int barH = isTall ? tallH : shortH;
+            var col = isTall ? tallColor : shortColor;
+            for (int y = baseY; y < baseY + barH; y++)
+                for (int x = barX[i]; x < barX[i] + barW; x++)
+                    tex.SetPixel(x, y, col);
+        }
+
+        // 上部に細い枠線（蝋板の縁）
+        var frame = new Color(0.55f, 0.40f, 0.20f, 1f);
+        for (int x = 0; x < W; x++) { tex.SetPixel(x, 0, frame); tex.SetPixel(x, H - 1, frame); }
+        for (int y = 0; y < H; y++) { tex.SetPixel(0, y, frame); tex.SetPixel(W - 1, y, frame); }
+
+        tex.Apply();
+
+        // PNG として保存
+        byte[] bytes = tex.EncodeToPNG();
+        Directory.CreateDirectory(Path.Combine(Application.dataPath, "../Assets/_Project/Textures"));
+        File.WriteAllBytes(Path.Combine(Application.dataPath, "../", path), bytes);
+        AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+        // Sprite として読み込めるよう TextureImporter 設定
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.filterMode = FilterMode.Point;
+            importer.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     // ─────────────────────────────────────────
@@ -610,9 +693,9 @@ public class Room2SetupEditor : EditorWindow
         // パズル本体：cabRoot に直接付与（旧 Cab_Lock 構造は削除して視界をクリアに）
         var puzzle = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
         // 解錠時に表示するヒントノートを配線（Rebuild DisplayCabinet 単体でも繋がるように）
-        if (noteCabinetHint == null)
-            noteCabinetHint = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteCabinetHint.asset");
-        if (noteCabinetHint != null) SetPrivate(puzzle, "cabinetHintNote", noteCabinetHint);
+        if (itemFlamePattern == null)
+            itemFlamePattern = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/FlamePattern.asset");
+        if (itemFlamePattern != null) SetPrivate(puzzle, "cabinetHintItem", itemFlamePattern);
         EditorUtility.SetDirty(puzzle);
 
         // 棚の中：Pandazole 食器プレハブで構成（上段=皿7・中段=カップ4・下段=ボウル2 → 正解 742）
@@ -868,28 +951,36 @@ public class Room2SetupEditor : EditorWindow
         for (int i = 0; i < 5; i++)
         {
             float x = candleX[i];
+            // 1,3,5番目（i=0,2,4）= 高い蝋燭、2,4番目（i=1,3）= 低い蝋燭（パズルヒントの凹凸対応）
+            bool isTall = (i % 2 == 0);
+            float candleScaleY = isTall ? 0.28f : 0.14f;
+            float candleBaseY  = 1.56f;                         // 蝋燭の底（受け皿の上）固定
+            float candleCenterY = candleBaseY + candleScaleY;   // 中心 = 底 + 半分の高さ
+            float candleTopY    = candleBaseY + candleScaleY * 2f;
+            float flameY        = candleTopY + 0.07f;
+
             // 装飾受け皿（3 段で円錐風）
             CreateCylinder(candleRoot,$"Cand_DishBase_{i}", new Vector3(x,1.44f,0f), new Vector3(0.20f,0.03f,0.20f), matGold);
             CreateCylinder(candleRoot,$"Cand_DishMid_{i}",  new Vector3(x,1.49f,0f), new Vector3(0.14f,0.04f,0.14f), matGold);
             CreateCylinder(candleRoot,$"Cand_DishRim_{i}",  new Vector3(x,1.54f,0f), new Vector3(0.18f,0.02f,0.18f), matGold);
 
-            // ロウソク本体
+            // ロウソク本体（高さ可変）
             CreateCylinder(candleRoot,$"Candle_{i}_Stick",
-                new Vector3(x,1.76f,0f), new Vector3(0.08f,0.20f,0.08f), matCandle);
+                new Vector3(x,candleCenterY,0f), new Vector3(0.08f,candleScaleY,0.08f), matCandle);
 
-            // 蝋滴り（小さな球で表現）
-            CreateSphere(candleRoot,$"Cand_Drip_{i}_1", new Vector3(x+0.05f,1.62f,0f), 0.03f, matCandle);
-            CreateSphere(candleRoot,$"Cand_Drip_{i}_2", new Vector3(x-0.04f,1.65f,0f), 0.025f, matCandle);
+            // 蝋滴り（小さな球で表現、底寄りに配置）
+            CreateSphere(candleRoot,$"Cand_Drip_{i}_1", new Vector3(x+0.05f,candleBaseY+0.06f,0f), 0.03f, matCandle);
+            CreateSphere(candleRoot,$"Cand_Drip_{i}_2", new Vector3(x-0.04f,candleBaseY+0.09f,0f), 0.025f, matCandle);
 
-            // 芯（黒い細い棒）
+            // 芯（黒い細い棒、蝋燭の頭上）
             CreateBox(candleRoot,$"Candle_{i}_Wick",
-                new Vector3(x,1.93f,0f), new Vector3(0.012f,0.04f,0.012f), matWick);
+                new Vector3(x,candleTopY,0f), new Vector3(0.012f,0.04f,0.012f), matWick);
 
             // 炎：2層構造（外側オレンジ加算ブレンド + 内側ホットコア）+ Sconce と同じ Point Light
             // 親 GameObject: SetActive(false) で炎全体を消灯
             var flame = new GameObject($"Candle_{i}_Flame");
             flame.transform.SetParent(candleRoot.transform, false);
-            flame.transform.localPosition = new Vector3(x, 2.00f, 0f);
+            flame.transform.localPosition = new Vector3(x, flameY, 0f);
             // 外側オレンジ（縦長楕円、加算ブレンドで内側を透過）
             var flameOuter = CreateSphere(flame,$"Flame_{i}_Outer",
                 Vector3.zero, 0.10f, matFlame);
@@ -1243,7 +1334,7 @@ public class Room2SetupEditor : EditorWindow
                 cabinet = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
             else Debug.LogWarning("[Room2Setup] R2_DisplayCabinetRoot が見つかりません");
         }
-        if (cabinet != null) { SetPrivate(cabinet, "cabinetHintNote", noteCabinetHint); EditorUtility.SetDirty(cabinet); }
+        if (cabinet != null) { SetPrivate(cabinet, "cabinetHintItem", itemFlamePattern); EditorUtility.SetDirty(cabinet); }
 
         var altar = Object.FindAnyObjectByType<AltarPuzzle>();
         if (altar == null)
@@ -1265,23 +1356,16 @@ public class Room2SetupEditor : EditorWindow
         EditorUtility.SetDirty(portrait);
 
         var saveMgr = Object.FindAnyObjectByType<SaveManager>();
-        if (saveMgr != null && itemRoomKey != null)
+        if (saveMgr != null)
         {
             var saveSO = new SerializedObject(saveMgr);
             var itemsProp = saveSO.FindProperty("allItems");
-            bool hasKey = false;
-            for (int i = 0; i < itemsProp.arraySize; i++)
-                if (itemsProp.GetArrayElementAtIndex(i).objectReferenceValue == itemRoomKey) { hasKey = true; break; }
-            if (!hasKey)
-            {
-                itemsProp.InsertArrayElementAtIndex(itemsProp.arraySize);
-                itemsProp.GetArrayElementAtIndex(itemsProp.arraySize - 1).objectReferenceValue = itemRoomKey;
-                saveSO.ApplyModifiedProperties();
-                EditorUtility.SetDirty(saveMgr);
-                Debug.Log("[Room2Setup] SaveManager: RoomKey追加");
-            }
+            AddItemIfMissing(itemsProp, itemRoomKey, "RoomKey");
+            AddItemIfMissing(itemsProp, itemFlamePattern, "FlamePattern");
+            saveSO.ApplyModifiedProperties();
+            EditorUtility.SetDirty(saveMgr);
         }
-        else if (saveMgr == null) Debug.LogWarning("[Room2Setup] SaveManagerが見つかりません");
+        else Debug.LogWarning("[Room2Setup] SaveManagerが見つかりません");
 
         Debug.Log("[Room2Setup] Room2 UI wire完了");
     }

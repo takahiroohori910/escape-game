@@ -22,6 +22,7 @@ namespace EscapeGame.Game
         public const string PhoneCord    = "phone_cord";
         public const string CircuitBoard = "circuit_board";
         public const string RoomKey      = "room_key";
+        public const string FlamePattern = "flame_pattern"; // 食器棚解錠で入手、燭台パズルのヒント
     }
 
     // カメラが映すエリアの定義
