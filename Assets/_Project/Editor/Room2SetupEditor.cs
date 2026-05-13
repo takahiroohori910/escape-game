@@ -49,7 +49,7 @@ public class Room2SetupEditor : EditorWindow
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle = GetOrCreateMatURP("Mat_R2_Candle", new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
-        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(15.0f,6.0f,0.5f));
+        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(22.0f,9.0f,0.8f));
 
         BuildCandelabra(room2Root, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -381,7 +381,7 @@ public class Room2SetupEditor : EditorWindow
         var matPortrait  = GetOrCreateMatURP("Mat_R2_Portrait",  new Color(0.14f,0.09f,0.07f), 0f, 0.05f);
         var matCandle    = GetOrCreateMatURP("Mat_R2_Candle",    new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
         var matFlame     = GetOrCreateMatURP("Mat_R2_Flame",     new Color(1.00f,0.55f,0.05f), 0f, 0.0f,
-                               new Color(15.0f, 6.0f, 0.5f));
+                               new Color(22.0f, 9.0f, 0.8f));
 
         // ── 外壁（石造り、w=10, h=5, local z=0-12）──
         CreateBox(room2Root, "R2_Floor",    new Vector3(0f,-0.1f, 6f), new Vector3(10f,0.20f,12f), matFloor);
@@ -824,6 +824,10 @@ public class Room2SetupEditor : EditorWindow
         // 炎マテリアル：内側コアの光を透過させるため加算ブレンドに設定（URP/Lit Transparent + Additive）
         ConfigureFlameMaterialAdditive(matFlame);
 
+        // 燭台全体に低光沢の金を使用（蝋燭の強い光で目立ちすぎないように）
+        // 元の matGold は他用途と共用なので、Candelabra 限定で差し替える
+        matGold = GetOrCreateMatURP("Mat_R2_GoldDull", new Color(0.78f,0.62f,0.16f), 0.4f, 0.25f);
+
         var candleRoot = new GameObject("R2_CandelabraRoot");
         candleRoot.transform.SetParent(room2Root.transform, false);
         candleRoot.transform.localPosition = new Vector3(0f, 0f, 4f);
@@ -846,16 +850,13 @@ public class Room2SetupEditor : EditorWindow
         // ── ハブ（アーム接続点、装飾的な 2 段球）──
         CreateSphere  (candleRoot,"Cand_HubBig",     new Vector3(0f,1.54f,0f), 0.22f, matGold);
 
-        // アーム・受け皿用の低光沢金（蝋燭の光が直接反射するので、無駄な強反射を抑える）
-        var matGoldDull = GetOrCreateMatURP("Mat_R2_GoldDull", new Color(0.78f,0.62f,0.16f), 0.4f, 0.25f);
-
         // ── 水平アーム（既存より太い） + 両端装飾キャップ ──
         var armGO = CreateCylinder(candleRoot,"Cand_Arm",
-            new Vector3(0f,1.54f,0f), new Vector3(0.09f,1.30f,0.09f), matGoldDull);
+            new Vector3(0f,1.54f,0f), new Vector3(0.09f,1.30f,0.09f), matGold);
         armGO.transform.localEulerAngles = new Vector3(0f,0f,90f);
         // アームの両端に装飾ボール（先端キャップ）
-        CreateSphere(candleRoot,"Cand_ArmCapL", new Vector3(-1.30f,1.54f,0f), 0.08f, matGoldDull);
-        CreateSphere(candleRoot,"Cand_ArmCapR", new Vector3( 1.30f,1.54f,0f), 0.08f, matGoldDull);
+        CreateSphere(candleRoot,"Cand_ArmCapL", new Vector3(-1.30f,1.54f,0f), 0.08f, matGold);
+        CreateSphere(candleRoot,"Cand_ArmCapR", new Vector3( 1.30f,1.54f,0f), 0.08f, matGold);
 
         // ── 中央上の尖塔（ゴシック風） ──
         CreateCylinder(candleRoot,"Cand_Finial",    new Vector3(0f,1.78f,0f), new Vector3(0.05f,0.16f,0.05f), matGold);
@@ -868,9 +869,9 @@ public class Room2SetupEditor : EditorWindow
         {
             float x = candleX[i];
             // 装飾受け皿（3 段で円錐風）
-            CreateCylinder(candleRoot,$"Cand_DishBase_{i}", new Vector3(x,1.44f,0f), new Vector3(0.20f,0.03f,0.20f), matGoldDull);
-            CreateCylinder(candleRoot,$"Cand_DishMid_{i}",  new Vector3(x,1.49f,0f), new Vector3(0.14f,0.04f,0.14f), matGoldDull);
-            CreateCylinder(candleRoot,$"Cand_DishRim_{i}",  new Vector3(x,1.54f,0f), new Vector3(0.18f,0.02f,0.18f), matGoldDull);
+            CreateCylinder(candleRoot,$"Cand_DishBase_{i}", new Vector3(x,1.44f,0f), new Vector3(0.20f,0.03f,0.20f), matGold);
+            CreateCylinder(candleRoot,$"Cand_DishMid_{i}",  new Vector3(x,1.49f,0f), new Vector3(0.14f,0.04f,0.14f), matGold);
+            CreateCylinder(candleRoot,$"Cand_DishRim_{i}",  new Vector3(x,1.54f,0f), new Vector3(0.18f,0.02f,0.18f), matGold);
 
             // ロウソク本体
             CreateCylinder(candleRoot,$"Candle_{i}_Stick",
@@ -895,7 +896,7 @@ public class Room2SetupEditor : EditorWindow
             flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
             // 内側コア（白っぽく超高輝度、外側の加算で透けて見える）
             var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
-                new Color(30.0f, 20.0f, 6.0f));
+                new Color(45.0f, 30.0f, 9.0f));
             var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
                 new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
             flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
@@ -906,8 +907,8 @@ public class Room2SetupEditor : EditorWindow
             var flameLight = flameLightGO.AddComponent<Light>();
             flameLight.type = LightType.Point;
             flameLight.color = new Color(1.0f, 0.65f, 0.20f);
-            flameLight.intensity = 2.5f;
-            flameLight.range = 6.0f;
+            flameLight.intensity = 3.5f;
+            flameLight.range = 6.5f;
             flame.SetActive(false); // 全消灯（パズルで点ける）
 
             // Collider + CandleInteractable
@@ -1054,7 +1055,7 @@ public class Room2SetupEditor : EditorWindow
         var matGold      = GetOrCreateMatURP("Mat_R2_Gold",      new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle    = GetOrCreateMatURP("Mat_R2_Candle",    new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
         var matFlame     = GetOrCreateMatURP("Mat_R2_Flame",     new Color(1.00f,0.55f,0.05f), 0f, 0.0f,
-                               new Color(15.0f, 6.0f, 0.5f));
+                               new Color(22.0f, 9.0f, 0.8f));
 
         BuildAltar(room2Root, matStone, matDarkStone, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
