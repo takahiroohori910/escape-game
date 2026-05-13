@@ -4,7 +4,8 @@ using EscapeGame.Core;
 
 namespace EscapeGame.Game
 {
-    // Room2の数字入力ボタン。CurrentAreaに応じてDisplayCabinetUI/AltarUIに振り分ける。
+    // Room2 の数字入力ボタン（祭壇用）。CurrentArea が Altar の時のみ反応。
+    // 食器棚はカウンタ式に変更されたため、ここからは振り分けない。
     [RequireComponent(typeof(Button))]
     public class Room2CodeButton : MonoBehaviour
     {
@@ -19,17 +20,10 @@ namespace EscapeGame.Game
         private void HandleClick()
         {
             AudioManager.Instance?.PlaySE("SE_Click");
-            var area = RoomViewController.Instance?.CurrentArea;
-            if (area == RoomArea.DisplayCabinet)
-            {
-                var ui = FindAnyObjectByType<DisplayCabinetUI>();
-                if (isClear) ui?.OnClearPressed(); else ui?.OnDigitPressed(digit);
-            }
-            else if (area == RoomArea.Altar)
-            {
-                var ui = FindAnyObjectByType<AltarUI>();
-                if (isClear) ui?.OnClearPressed(); else ui?.OnDigitPressed(digit);
-            }
+            if (RoomViewController.Instance?.CurrentArea != RoomArea.Altar) return;
+
+            var ui = FindAnyObjectByType<AltarUI>();
+            if (isClear) ui?.OnClearPressed(); else ui?.OnDigitPressed(digit);
         }
     }
 }

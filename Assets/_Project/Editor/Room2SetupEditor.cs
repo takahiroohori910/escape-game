@@ -80,34 +80,26 @@ public class Room2SetupEditor : EditorWindow
         Debug.Log("[Room2Setup] Rebuild StainedGlass 完了");
     }
 
-    // 食器棚のみ再生成（他の Room2 要素は触らない、Prop_/Food_ プレフィックスの子は保護）
+    // 食器棚のみ再生成（破壊的：内部の食器配置や解錠装置も全て再生成される）
     [MenuItem("EscapeGame/Setup/Rebuild DisplayCabinet")]
     public static void RebuildDisplayCabinet()
     {
         if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
+        if (!GitGuard.RequireCleanGit("Rebuild DisplayCabinet")) return;
 
         var room2Root = GameObject.Find("Room2");
         if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
 
-        // Pandazole 食器など外部 prefab を一時避難（Prop_/Food_ プレフィックス）
-        var preserved = new System.Collections.Generic.List<(GameObject obj, Vector3 pos, Quaternion rot, Vector3 scale)>();
         var existing = GameObject.Find("R2_DisplayCabinetRoot");
-        if (existing != null)
-        {
-            var children = new System.Collections.Generic.List<Transform>();
-            foreach (Transform child in existing.transform) children.Add(child);
-            foreach (var child in children)
-            {
-                if (child.name.StartsWith("Prop_") || child.name.StartsWith("Food_"))
-                {
-                    preserved.Add((child.gameObject, child.position, child.rotation, child.localScale));
-                    child.SetParent(null, true);
-                }
-            }
-            Object.DestroyImmediate(existing);
-        }
+        if (existing != null) Object.DestroyImmediate(existing);
         var existingZone = GameObject.Find("R2_ClickZone_Cabinet");
         if (existingZone != null) Object.DestroyImmediate(existingZone);
+        // 旧テンキーパネルが残っていれば消す
+        var oldPanel = GameObject.Find("DisplayCabinetPanel");
+        if (oldPanel != null) Object.DestroyImmediate(oldPanel);
+
+        // ヒントノートだけ参照を取り直す
+        noteCabinetHint = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteCabinetHint.asset");
 
         var matDarkWood = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wood_Dark.mat")
                           ?? GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
@@ -116,21 +108,8 @@ public class Room2SetupEditor : EditorWindow
 
         BuildDisplayCabinet(room2Root, matDarkWood, matGold, matStone);
 
-        // 避難していた外部 prefab を新しい R2_DisplayCabinetRoot 配下に戻す
-        var newRoot = GameObject.Find("R2_DisplayCabinetRoot");
-        if (newRoot != null)
-        {
-            foreach (var (obj, pos, rot, scale) in preserved)
-            {
-                obj.transform.SetParent(newRoot.transform, true);
-                obj.transform.position = pos;
-                obj.transform.rotation = rot;
-                obj.transform.localScale = scale;
-            }
-        }
-
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
-        Debug.Log($"[Room2Setup] Rebuild DisplayCabinet 完了（外部prefab {preserved.Count} 個を保護）");
+        Debug.Log("[Room2Setup] Rebuild DisplayCabinet 完了");
     }
 
     // ─────────────────────────────────────────
@@ -629,12 +608,12 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_FrameRight", new Vector3( 0.96f,1.63f,0.37f), new Vector3(0.09f,2.20f,0.07f), matGold);
         CreateBox(cabRoot,"Cab_FrameHMid",  new Vector3(0f,1.63f,0.37f),     new Vector3(0.09f,2.20f,0.07f), matGold);
 
-        // 錠前（クリッカブル）— 南京錠形状
+        // 錠前（飾り）— 南京錠形状。新仕様ではクリック不可、扉脇の解錠装置で解く
         var cabLockGO = CreateBox(cabRoot,"Cab_Lock",
             new Vector3(0f,1.55f,0.42f), new Vector3(0.42f,0.50f,0.14f), matGold);
-        AddBoxCollider(cabLockGO, new Vector3(1.2f,1.2f,1.2f));
-        if (cabLockGO.GetComponent<DisplayCabinetInteractable>() == null)
-            cabLockGO.AddComponent<DisplayCabinetInteractable>();
+        // 旧 Collider と旧 Interactable が残っていれば除去（クリック不可にする）
+        var oldCol = cabLockGO.GetComponent<BoxCollider>();
+        if (oldCol != null) Object.DestroyImmediate(oldCol);
         if (cabLockGO.GetComponent<DisplayCabinetPuzzle>() == null)
             cabLockGO.AddComponent<DisplayCabinetPuzzle>();
         // シャックル（U字バー部分）
@@ -649,29 +628,11 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(cabRoot,"Cab_Keyhole",
             new Vector3(0f,1.55f,0.50f), new Vector3(0.08f,0.20f,0.02f), matKeyhole);
 
-        // 棚の中の装飾品（3段、各段に多様な食器）
-        var matSilver = GetOrCreateMatURP("Mat_R2_Silver", new Color(0.72f,0.72f,0.76f), 0.85f, 0.72f);
-        var matCup    = GetOrCreateMatURP("Mat_R2_Cup",    new Color(0.65f,0.60f,0.55f), 0.35f, 0.80f);
-        var matBook2  = GetOrCreateMatURP("Mat_R2_Book2",  new Color(0.50f,0.15f,0.10f), 0f, 0.12f);
-        var matPorcelain = GetOrCreateMatURP("Mat_R2_Porcelain", new Color(0.95f,0.92f,0.88f), 0.05f, 0.60f);
+        // 棚の中：Pandazole 食器プレハブで構成（上段=皿7・中段=カップ4・下段=ボウル2 → 正解 742）
+        PlaceCabinetDishes(cabRoot);
 
-        // 上段：ティーセット（ティーポット + 皿 + カップ）
-        CreateSphere(cabRoot,"Cab_Teapot_Body",  new Vector3(-0.55f,2.18f,-0.05f), 0.13f, matPorcelain);
-        CreateBox(cabRoot,"Cab_Teapot_Spout",    new Vector3(-0.78f,2.20f,-0.05f), new Vector3(0.16f,0.05f,0.05f), matPorcelain);
-        CreateCylinder(cabRoot,"Cab_Teapot_Handle", new Vector3(-0.40f,2.20f,-0.05f), new Vector3(0.04f,0.10f,0.04f), matPorcelain);
-        CreateCylinder(cabRoot,"Cab_Plate_U",    new Vector3( 0.00f,2.09f,-0.05f), new Vector3(0.32f,0.02f,0.32f), matPorcelain);
-        CreateCylinder(cabRoot,"Cab_Cup_U",      new Vector3( 0.55f,2.15f,-0.05f), new Vector3(0.10f,0.10f,0.10f), matPorcelain);
-
-        // 中段：銀器（カップ + 銀の壷 + 本）
-        CreateCylinder(cabRoot,"Cab_SilverCup",  new Vector3(-0.55f,1.60f,-0.05f), new Vector3(0.11f,0.18f,0.11f), matSilver);
-        CreateSphere(cabRoot,"Cab_SilverUrn",    new Vector3( 0.00f,1.62f,-0.05f), 0.15f, matSilver);
-        CreateBox(cabRoot,"Cab_BookU1",          new Vector3( 0.55f,1.60f,-0.05f), new Vector3(0.20f,0.28f,0.10f), matBook2);
-
-        // 下段：ワインボトル + 大皿 + 本
-        CreateCylinder(cabRoot,"Cab_WineBottle", new Vector3(-0.55f,1.05f,-0.05f), new Vector3(0.09f,0.32f,0.09f), matBook2);
-        CreateCylinder(cabRoot,"Cab_WineNeck",   new Vector3(-0.55f,1.30f,-0.05f), new Vector3(0.04f,0.10f,0.04f), matBook2);
-        CreateCylinder(cabRoot,"Cab_Plate_L",    new Vector3( 0.00f,0.92f,-0.05f), new Vector3(0.34f,0.02f,0.34f), matPorcelain);
-        CreateBox(cabRoot,"Cab_BookL1",          new Vector3( 0.45f,1.02f,-0.05f), new Vector3(0.22f,0.28f,0.10f), matBook2);
+        // 扉の右脇に解錠装置（3つのカウンタボタン + 確定/リセットレバー）
+        BuildCabinetUnlockDevice(cabRoot, cabLockGO.GetComponent<DisplayCabinetPuzzle>(), matDarkWood, matGold);
 
         // 取っ手（凝った金色ノブ、扉中央）：ベース円盤+支柱+装飾球
         CreateCylinder(cabRoot,"Cab_KnobBase_U", new Vector3(0f,2.20f,0.42f), new Vector3(0.10f,0.02f,0.10f), matGold);
@@ -724,6 +685,131 @@ public class Room2SetupEditor : EditorWindow
         AddBoxCollider(cabZone, new Vector3(1.2f,3.5f,1.8f));
         var cabCZ = cabZone.GetComponent<AreaClickZone>() ?? cabZone.AddComponent<AreaClickZone>();
         SetPrivate(cabCZ, "targetArea", RoomArea.DisplayCabinet);
+    }
+
+    // ── 食器棚内：Pandazole プレハブ配置（上段=皿7・中段=カップ4・下段=ボウル2）──
+    static void PlaceCabinetDishes(GameObject cabRoot)
+    {
+        const string baseDir = "Assets/Pandazole_Ultimate_Pack/Pandazole Kitchen Food/Prefabs/";
+        var platePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(baseDir + "Prop_Plate_01.prefab");
+        var cupPrefab   = AssetDatabase.LoadAssetAtPath<GameObject>(baseDir + "Prop_Cup_01.prefab");
+        var bowlPrefab  = AssetDatabase.LoadAssetAtPath<GameObject>(baseDir + "Prop_Bowel_01.prefab");
+        if (platePrefab == null || cupPrefab == null || bowlPrefab == null)
+        {
+            Debug.LogError("[Room2Setup] Pandazole プレハブが見つかりません。Package を再インポートしてください");
+            return;
+        }
+
+        // 上段（y≈2.10、Cab_ShelfUpper の上）：皿 7 枚を1列に並べる
+        // 棚内寸 x: -0.90〜+0.90、step=0.27 でも余裕がある（皿スケール 0.4 想定）
+        for (int i = 0; i < 7; i++)
+        {
+            float x = -0.84f + i * 0.28f;
+            var plate = (GameObject)PrefabUtility.InstantiatePrefab(platePrefab, cabRoot.transform);
+            plate.name = $"Cab_Dish_Plate_{i}";
+            plate.transform.localPosition = new Vector3(x, 2.12f, -0.05f);
+            plate.transform.localScale = Vector3.one * 0.4f;
+        }
+
+        // 中段（y≈1.52）：カップ 4 個を1列に並べる
+        for (int i = 0; i < 4; i++)
+        {
+            float x = -0.60f + i * 0.40f;
+            var cup = (GameObject)PrefabUtility.InstantiatePrefab(cupPrefab, cabRoot.transform);
+            cup.name = $"Cab_Dish_Cup_{i}";
+            cup.transform.localPosition = new Vector3(x, 1.52f, -0.05f);
+            cup.transform.localScale = Vector3.one * 0.5f;
+        }
+
+        // 下段（y≈0.92）：ボウル 2 個を並べる
+        for (int i = 0; i < 2; i++)
+        {
+            float x = -0.30f + i * 0.60f;
+            var bowl = (GameObject)PrefabUtility.InstantiatePrefab(bowlPrefab, cabRoot.transform);
+            bowl.name = $"Cab_Dish_Bowl_{i}";
+            bowl.transform.localPosition = new Vector3(x, 0.92f, -0.05f);
+            bowl.transform.localScale = Vector3.one * 0.6f;
+        }
+    }
+
+    // ── 食器棚解錠装置：3 つのカウンタボタン + 確定 / リセットレバー ──
+    static void BuildCabinetUnlockDevice(GameObject cabRoot, DisplayCabinetPuzzle puzzle, Material matDarkWood, Material matGold)
+    {
+        if (puzzle == null) { Debug.LogError("[Room2Setup] DisplayCabinetPuzzle が null"); return; }
+
+        // 装置全体の親（食器棚の右側面、player の右側に張り出す位置）
+        // cabRoot は Y=90 回転済み。local -X 方向が player の右側に対応
+        var deviceRoot = new GameObject("Cab_UnlockDevice");
+        deviceRoot.transform.SetParent(cabRoot.transform, false);
+        deviceRoot.transform.localPosition = new Vector3(-1.25f, 1.40f, 0.30f);
+
+        // 背板（縦長の真鍮プレート）
+        CreateBox(deviceRoot, "UD_BackPlate", Vector3.zero, new Vector3(0.20f, 1.80f, 0.04f), matDarkWood);
+        CreateBox(deviceRoot, "UD_GoldTrim", new Vector3(0f, 0f, 0.02f), new Vector3(0.16f, 1.74f, 0.01f), matGold);
+
+        // 3 つのボタン（上段用 / 中段用 / 下段用）— 棚段の高さに合わせて配置
+        // 食器棚棚段 y: 上段=2.10, 中段=1.52, 下段=0.92
+        // deviceRoot の local y=1.40 を基準にすると相対 y: 上段=+0.70, 中段=+0.12, 下段=-0.48
+        CreateCabinetButton(deviceRoot, "UD_Button_Top", new Vector3(0.04f,  0.70f, 0.04f), matGold,
+            puzzle, CabinetCounterButton.CounterTarget.Top);
+        CreateCabinetButton(deviceRoot, "UD_Button_Mid", new Vector3(0.04f,  0.12f, 0.04f), matGold,
+            puzzle, CabinetCounterButton.CounterTarget.Mid);
+        CreateCabinetButton(deviceRoot, "UD_Button_Bot", new Vector3(0.04f, -0.48f, 0.04f), matGold,
+            puzzle, CabinetCounterButton.CounterTarget.Bot);
+
+        // 確定 / リセットレバー（下部）
+        CreateCabinetLever(deviceRoot, "UD_Lever_Submit", new Vector3(0.04f, -0.78f, 0.04f),
+            new Color(0.20f, 0.55f, 0.15f), matGold, puzzle, CabinetLever.LeverMode.Submit);
+        CreateCabinetLever(deviceRoot, "UD_Lever_Reset", new Vector3(0.04f, -0.86f, 0.04f),
+            new Color(0.55f, 0.20f, 0.15f), matGold, puzzle, CabinetLever.LeverMode.Reset);
+    }
+
+    static void CreateCabinetButton(GameObject deviceRoot, string name, Vector3 localPos, Material matBtn,
+        DisplayCabinetPuzzle puzzle, CabinetCounterButton.CounterTarget target)
+    {
+        // ボタン本体（小さな球）
+        var btn = CreateSphere(deviceRoot, name, localPos, 0.06f, matBtn);
+        AddBoxCollider(btn, new Vector3(2.5f, 2.5f, 2.5f)); // クリックしやすい大きめの当たり判定
+
+        // ボタンの左側（プレート内側）にカウンタ表示
+        var dispGO = new GameObject(name + "_Disp");
+        dispGO.transform.SetParent(deviceRoot.transform, false);
+        // ボタン位置から x = -0.10（プレート内側）、z = 0.045（プレート表面より少し前）
+        dispGO.transform.localPosition = new Vector3(localPos.x - 0.10f, localPos.y, 0.045f);
+        var tmp = dispGO.AddComponent<TextMeshPro>();
+        tmp.text = "0";
+        tmp.fontSize = 1.6f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = new Color(1.0f, 0.95f, 0.80f);
+        tmp.rectTransform.sizeDelta = new Vector2(0.10f, 0.10f);
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
+        // フォント自動適用（プロジェクトの日本語フォントが使われる）
+
+        // スクリプト追加＋SerializedField 配線
+        var ccb = btn.GetComponent<CabinetCounterButton>() ?? btn.AddComponent<CabinetCounterButton>();
+        var so = new SerializedObject(ccb);
+        so.FindProperty("target").enumValueIndex = (int)target;
+        so.FindProperty("puzzle").objectReferenceValue = puzzle;
+        so.FindProperty("displayText").objectReferenceValue = tmp;
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(ccb);
+    }
+
+    static void CreateCabinetLever(GameObject deviceRoot, string name, Vector3 localPos, Color color, Material matGold,
+        DisplayCabinetPuzzle puzzle, CabinetLever.LeverMode mode)
+    {
+        // レバーの本体（横長の小さなバー）
+        var matLever = GetOrCreateMatURP("Mat_R2_Lever_" + mode, color, 0.4f, 0.30f);
+        var lever = CreateBox(deviceRoot, name, localPos, new Vector3(0.10f, 0.04f, 0.04f), matLever);
+        AddBoxCollider(lever, new Vector3(1.8f, 2.0f, 2.0f));
+
+        // スクリプト
+        var cl = lever.GetComponent<CabinetLever>() ?? lever.AddComponent<CabinetLever>();
+        var so = new SerializedObject(cl);
+        so.FindProperty("mode").enumValueIndex = (int)mode;
+        so.FindProperty("puzzle").objectReferenceValue = puzzle;
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(cl);
     }
 
     // ── 燭台（カンデラブラ）── アンティーク装飾的なゴシック燭台
@@ -1288,8 +1374,10 @@ public class Room2SetupEditor : EditorWindow
         var managers = GameObject.Find("Managers");
         if (managers == null) { Debug.LogError("[Room2Setup] Managersが見つかりません"); return; }
 
-        var cabinetUI = managers.GetComponent<DisplayCabinetUI>() ?? managers.AddComponent<DisplayCabinetUI>();
-        CreateCodePadPanel(canvas, "DisplayCabinetPanel", "食器棚の錠前", cabinetUI);
+        // 食器棚はカウンタ式に変更されたため、テンキーパネルは作らない
+        // 旧 DisplayCabinetPanel が残っていれば消す
+        var oldCabPanel = GameObject.Find("DisplayCabinetPanel");
+        if (oldCabPanel != null) Object.DestroyImmediate(oldCabPanel);
 
         var altarUI = managers.GetComponent<AltarUI>() ?? managers.AddComponent<AltarUI>();
         CreateCodePadPanel(canvas, "AltarPanel", "祭壇の封印", altarUI);
