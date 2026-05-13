@@ -49,7 +49,7 @@ public class Room2SetupEditor : EditorWindow
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle = GetOrCreateMatURP("Mat_R2_Candle", new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
-        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(6.0f,2.4f,0.16f));
+        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(10.0f,4.5f,0.4f));
 
         BuildCandelabra(room2Root, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -743,11 +743,11 @@ public class Room2SetupEditor : EditorWindow
         CreateCabinetButton(deviceRoot, "UD_Button_Bot", new Vector3(0.04f, -0.48f, 0.04f), matGold,
             puzzle, CabinetCounterButton.CounterTarget.Bot);
 
-        // 確定 / リセットレバー（下部）
-        CreateCabinetLever(deviceRoot, "UD_Lever_Submit", new Vector3(0.04f, -0.78f, 0.04f),
-            new Color(0.20f, 0.55f, 0.15f), matGold, puzzle, CabinetLever.LeverMode.Submit);
-        CreateCabinetLever(deviceRoot, "UD_Lever_Reset", new Vector3(0.04f, -0.86f, 0.04f),
-            new Color(0.55f, 0.20f, 0.15f), matGold, puzzle, CabinetLever.LeverMode.Reset);
+        // 確定 / リセットレバー（下部に間隔を取って大きめに配置）
+        CreateCabinetLever(deviceRoot, "UD_Lever_Submit", new Vector3(0.04f, -0.70f, 0.04f),
+            new Color(0.20f, 0.65f, 0.20f), matGold, puzzle, CabinetLever.LeverMode.Submit, "確定");
+        CreateCabinetLever(deviceRoot, "UD_Lever_Reset", new Vector3(0.04f, -0.84f, 0.04f),
+            new Color(0.70f, 0.18f, 0.15f), matGold, puzzle, CabinetLever.LeverMode.Reset, "戻す");
     }
 
     static void CreateCabinetButton(GameObject deviceRoot, string name, Vector3 localPos, Material matBtn,
@@ -762,6 +762,8 @@ public class Room2SetupEditor : EditorWindow
         dispGO.transform.SetParent(deviceRoot.transform, false);
         // ボタン位置から x = -0.10（プレート内側）、z = 0.045（プレート表面より少し前）
         dispGO.transform.localPosition = new Vector3(localPos.x - 0.10f, localPos.y, 0.045f);
+        // cabRoot(Y=90) 親回転下で TMP の読み方向を camera 向きに揃えるため Y=180 反転
+        dispGO.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
         var tmp = dispGO.AddComponent<TextMeshPro>();
         tmp.text = "0";
         tmp.fontSize = 1.6f;
@@ -782,12 +784,25 @@ public class Room2SetupEditor : EditorWindow
     }
 
     static void CreateCabinetLever(GameObject deviceRoot, string name, Vector3 localPos, Color color, Material matGold,
-        DisplayCabinetPuzzle puzzle, CabinetLever.LeverMode mode)
+        DisplayCabinetPuzzle puzzle, CabinetLever.LeverMode mode, string label)
     {
-        // レバーの本体（横長の小さなバー）
-        var matLever = GetOrCreateMatURP("Mat_R2_Lever_" + mode, color, 0.4f, 0.30f);
-        var lever = CreateBox(deviceRoot, name, localPos, new Vector3(0.10f, 0.04f, 0.04f), matLever);
-        AddBoxCollider(lever, new Vector3(1.8f, 2.0f, 2.0f));
+        // レバーの本体（大きめの正方形ボタン風）
+        var matLever = GetOrCreateMatURP("Mat_R2_Lever_" + mode, color, 0.4f, 0.30f, color * 0.3f);
+        var lever = CreateBox(deviceRoot, name, localPos, new Vector3(0.14f, 0.10f, 0.05f), matLever);
+        AddBoxCollider(lever, new Vector3(1.2f, 1.2f, 1.5f));
+
+        // ラベル TMP（レバー上に表示）
+        var labelGO = new GameObject(name + "_Label");
+        labelGO.transform.SetParent(deviceRoot.transform, false);
+        labelGO.transform.localPosition = new Vector3(localPos.x, localPos.y, localPos.z + 0.02f);
+        labelGO.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
+        var labelTmp = labelGO.AddComponent<TextMeshPro>();
+        labelTmp.text = label;
+        labelTmp.fontSize = 1.2f;
+        labelTmp.alignment = TextAlignmentOptions.Center;
+        labelTmp.color = Color.white;
+        labelTmp.rectTransform.sizeDelta = new Vector2(0.14f, 0.10f);
+        labelTmp.textWrappingMode = TextWrappingModes.NoWrap;
 
         // スクリプト
         var cl = lever.GetComponent<CabinetLever>() ?? lever.AddComponent<CabinetLever>();
@@ -869,7 +884,7 @@ public class Room2SetupEditor : EditorWindow
             flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
             // 内側コア（白っぽく超高輝度）
             var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
-                new Color(12.0f, 8.0f, 2.5f));
+                new Color(20.0f, 13.0f, 4.0f));
             var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
                 new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
             flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
@@ -880,8 +895,8 @@ public class Room2SetupEditor : EditorWindow
             var flameLight = flameLightGO.AddComponent<Light>();
             flameLight.type = LightType.Point;
             flameLight.color = new Color(1.0f, 0.6f, 0.15f);
-            flameLight.intensity = 0.8f;
-            flameLight.range = 1.6f;
+            flameLight.intensity = 1.8f;
+            flameLight.range = 2.4f;
             flame.SetActive(false); // 全消灯（パズルで点ける）
 
             // Collider + CandleInteractable

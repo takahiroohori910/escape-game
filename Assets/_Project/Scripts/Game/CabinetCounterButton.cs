@@ -15,10 +15,6 @@ namespace EscapeGame.Game
         [SerializeField] private DisplayCabinetPuzzle puzzle;
         [SerializeField] private TextMeshPro displayText;
 
-        private Collider col;
-
-        private void Awake() => col = GetComponent<Collider>();
-
         private void Update()
         {
             UpdateDisplay();
@@ -33,7 +29,8 @@ namespace EscapeGame.Game
             if (cam == null) return;
             var ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (!Physics.Raycast(ray, out var hit)) return;
-            if (hit.collider != col) return;
+            // 同じ GameObject に SphereCollider と BoxCollider が同居するため transform で比較
+            if (hit.transform != transform) return;
 
             switch (target)
             {

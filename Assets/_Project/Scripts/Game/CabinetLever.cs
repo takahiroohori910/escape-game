@@ -13,10 +13,6 @@ namespace EscapeGame.Game
         [SerializeField] private LeverMode mode;
         [SerializeField] private DisplayCabinetPuzzle puzzle;
 
-        private Collider col;
-
-        private void Awake() => col = GetComponent<Collider>();
-
         private void Update()
         {
             if (Mouse.current == null) return;
@@ -29,7 +25,7 @@ namespace EscapeGame.Game
             if (cam == null) return;
             var ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (!Physics.Raycast(ray, out var hit)) return;
-            if (hit.collider != col) return;
+            if (hit.transform != transform) return;
 
             if (mode == LeverMode.Submit) puzzle.Submit();
             else puzzle.ResetCounters();
