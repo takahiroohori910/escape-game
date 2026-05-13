@@ -821,6 +821,9 @@ public class Room2SetupEditor : EditorWindow
     // ── 燭台（カンデラブラ）── アンティーク装飾的なゴシック燭台
     static void BuildCandelabra(GameObject room2Root, Material matGold, Material matCandle, Material matFlame)
     {
+        // 炎マテリアル：内側コアの光を透過させるため加算ブレンドに設定（URP/Lit Transparent + Additive）
+        ConfigureFlameMaterialAdditive(matFlame);
+
         var candleRoot = new GameObject("R2_CandelabraRoot");
         candleRoot.transform.SetParent(room2Root.transform, false);
         candleRoot.transform.localPosition = new Vector3(0f, 0f, 4f);
@@ -878,15 +881,21 @@ public class Room2SetupEditor : EditorWindow
             CreateBox(candleRoot,$"Candle_{i}_Wick",
                 new Vector3(x,1.93f,0f), new Vector3(0.012f,0.04f,0.012f), matWick);
 
-            // 炎：Sconce（壁付け燭台）と同じ単一スフィア構造 + 同じ Point Light
+            // 炎：2層構造（外側オレンジ加算ブレンド + 内側ホットコア）+ Sconce と同じ Point Light
             // 親 GameObject: SetActive(false) で炎全体を消灯
             var flame = new GameObject($"Candle_{i}_Flame");
             flame.transform.SetParent(candleRoot.transform, false);
             flame.transform.localPosition = new Vector3(x, 2.00f, 0f);
-            // Sconce の Sc_*_Flame と同じ寸法（球 0.08、scale 0.07,0.13,0.07）
-            var flameSphere = CreateSphere(flame,$"Flame_{i}_Outer",
-                Vector3.zero, 0.08f, matFlame);
-            flameSphere.transform.localScale = new Vector3(0.07f, 0.13f, 0.07f);
+            // 外側オレンジ（縦長楕円、加算ブレンドで内側を透過）
+            var flameOuter = CreateSphere(flame,$"Flame_{i}_Outer",
+                Vector3.zero, 0.10f, matFlame);
+            flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
+            // 内側コア（白っぽく超高輝度、外側の加算で透けて見える）
+            var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
+                new Color(12.0f, 8.0f, 2.5f));
+            var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
+                new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
+            flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
             // Point Light（Sconce の Sc_*_Light と同じ設定）
             var flameLightGO = new GameObject($"Flame_{i}_Light");
             flameLightGO.transform.SetParent(flame.transform, false);
@@ -1364,6 +1373,24 @@ public class Room2SetupEditor : EditorWindow
 
     static Material GetOrCreateMat(string name, Color color)
         => GetOrCreateMatURP(name, color);
+
+    // URP/Lit マテリアルを「透明＋加算ブレンド」に切り替える（炎用、内側コアの光を透過させる）
+    static void ConfigureFlameMaterialAdditive(Material mat)
+    {
+        if (mat == null) return;
+        mat.SetFloat("_Surface", 1f);                     // 1 = Transparent
+        mat.SetFloat("_Blend", 2f);                       // 2 = Additive
+        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
+        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+        mat.SetFloat("_ZWrite", 0f);
+        mat.SetOverrideTag("RenderType", "Transparent");
+        mat.renderQueue = 3000;
+        mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        mat.DisableKeyword("_ALPHATEST_ON");
+        EditorUtility.SetDirty(mat);
+    }
 
     // ─────────────────────────────────────────
     // 7. Room2 Canvas UIパネル作成
