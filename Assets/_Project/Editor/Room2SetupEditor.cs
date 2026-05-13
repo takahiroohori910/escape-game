@@ -49,7 +49,7 @@ public class Room2SetupEditor : EditorWindow
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matCandle = GetOrCreateMatURP("Mat_R2_Candle", new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
-        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(10.0f,4.0f,0.3f));
+        var matFlame  = GetOrCreateMatURP("Mat_R2_Flame",  new Color(1.00f,0.55f,0.05f), 0f, 0f, new Color(15.0f,6.0f,0.5f));
 
         BuildCandelabra(room2Root, matGold, matCandle, matFlame);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -381,7 +381,7 @@ public class Room2SetupEditor : EditorWindow
         var matPortrait  = GetOrCreateMatURP("Mat_R2_Portrait",  new Color(0.14f,0.09f,0.07f), 0f, 0.05f);
         var matCandle    = GetOrCreateMatURP("Mat_R2_Candle",    new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
         var matFlame     = GetOrCreateMatURP("Mat_R2_Flame",     new Color(1.00f,0.55f,0.05f), 0f, 0.0f,
-                               new Color(10.0f, 4.0f, 0.3f));
+                               new Color(15.0f, 6.0f, 0.5f));
 
         // ── 外壁（石造り、w=10, h=5, local z=0-12）──
         CreateBox(room2Root, "R2_Floor",    new Vector3(0f,-0.1f, 6f), new Vector3(10f,0.20f,12f), matFloor);
@@ -846,13 +846,16 @@ public class Room2SetupEditor : EditorWindow
         // ── ハブ（アーム接続点、装飾的な 2 段球）──
         CreateSphere  (candleRoot,"Cand_HubBig",     new Vector3(0f,1.54f,0f), 0.22f, matGold);
 
+        // アーム・受け皿用の低光沢金（蝋燭の光が直接反射するので、無駄な強反射を抑える）
+        var matGoldDull = GetOrCreateMatURP("Mat_R2_GoldDull", new Color(0.78f,0.62f,0.16f), 0.4f, 0.25f);
+
         // ── 水平アーム（既存より太い） + 両端装飾キャップ ──
         var armGO = CreateCylinder(candleRoot,"Cand_Arm",
-            new Vector3(0f,1.54f,0f), new Vector3(0.09f,1.30f,0.09f), matGold);
+            new Vector3(0f,1.54f,0f), new Vector3(0.09f,1.30f,0.09f), matGoldDull);
         armGO.transform.localEulerAngles = new Vector3(0f,0f,90f);
         // アームの両端に装飾ボール（先端キャップ）
-        CreateSphere(candleRoot,"Cand_ArmCapL", new Vector3(-1.30f,1.54f,0f), 0.08f, matGold);
-        CreateSphere(candleRoot,"Cand_ArmCapR", new Vector3( 1.30f,1.54f,0f), 0.08f, matGold);
+        CreateSphere(candleRoot,"Cand_ArmCapL", new Vector3(-1.30f,1.54f,0f), 0.08f, matGoldDull);
+        CreateSphere(candleRoot,"Cand_ArmCapR", new Vector3( 1.30f,1.54f,0f), 0.08f, matGoldDull);
 
         // ── 中央上の尖塔（ゴシック風） ──
         CreateCylinder(candleRoot,"Cand_Finial",    new Vector3(0f,1.78f,0f), new Vector3(0.05f,0.16f,0.05f), matGold);
@@ -865,9 +868,9 @@ public class Room2SetupEditor : EditorWindow
         {
             float x = candleX[i];
             // 装飾受け皿（3 段で円錐風）
-            CreateCylinder(candleRoot,$"Cand_DishBase_{i}", new Vector3(x,1.44f,0f), new Vector3(0.20f,0.03f,0.20f), matGold);
-            CreateCylinder(candleRoot,$"Cand_DishMid_{i}",  new Vector3(x,1.49f,0f), new Vector3(0.14f,0.04f,0.14f), matGold);
-            CreateCylinder(candleRoot,$"Cand_DishRim_{i}",  new Vector3(x,1.54f,0f), new Vector3(0.18f,0.02f,0.18f), matGold);
+            CreateCylinder(candleRoot,$"Cand_DishBase_{i}", new Vector3(x,1.44f,0f), new Vector3(0.20f,0.03f,0.20f), matGoldDull);
+            CreateCylinder(candleRoot,$"Cand_DishMid_{i}",  new Vector3(x,1.49f,0f), new Vector3(0.14f,0.04f,0.14f), matGoldDull);
+            CreateCylinder(candleRoot,$"Cand_DishRim_{i}",  new Vector3(x,1.54f,0f), new Vector3(0.18f,0.02f,0.18f), matGoldDull);
 
             // ロウソク本体
             CreateCylinder(candleRoot,$"Candle_{i}_Stick",
@@ -892,7 +895,7 @@ public class Room2SetupEditor : EditorWindow
             flameOuter.transform.localScale = new Vector3(0.11f, 0.22f, 0.11f);
             // 内側コア（白っぽく超高輝度、外側の加算で透けて見える）
             var matFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
-                new Color(20.0f, 13.0f, 4.0f));
+                new Color(30.0f, 20.0f, 6.0f));
             var flameCore = CreateSphere(flame,$"Flame_{i}_Core",
                 new Vector3(0f, 0.015f, 0f), 0.06f, matFlameCore);
             flameCore.transform.localScale = new Vector3(0.05f, 0.13f, 0.05f);
@@ -903,8 +906,8 @@ public class Room2SetupEditor : EditorWindow
             var flameLight = flameLightGO.AddComponent<Light>();
             flameLight.type = LightType.Point;
             flameLight.color = new Color(1.0f, 0.65f, 0.20f);
-            flameLight.intensity = 1.8f;
-            flameLight.range = 5.5f;
+            flameLight.intensity = 2.5f;
+            flameLight.range = 6.0f;
             flame.SetActive(false); // 全消灯（パズルで点ける）
 
             // Collider + CandleInteractable
@@ -1031,6 +1034,33 @@ public class Room2SetupEditor : EditorWindow
         SetPrivate(portCZ, "targetArea", RoomArea.Portrait);
     }
 
+    // 祭壇のみ再生成（蝋燭の炎強化など）
+    [MenuItem("EscapeGame/Setup/Rebuild Altar")]
+    public static void RebuildAltarMenu()
+    {
+        if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
+        if (!GitGuard.RequireCleanGit("Rebuild Altar")) return;
+
+        var room2Root = GameObject.Find("Room2");
+        if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
+
+        var existing = GameObject.Find("R2_AltarRoot");
+        if (existing != null) Object.DestroyImmediate(existing);
+        var existingZone = GameObject.Find("R2_ClickZone_Altar");
+        if (existingZone != null) Object.DestroyImmediate(existingZone);
+
+        var matStone     = GetOrCreateMatURP("Mat_R2_Stone",     new Color(0.45f,0.40f,0.36f), 0f, 0.12f);
+        var matDarkStone = GetOrCreateMatURP("Mat_R2_DarkStone", new Color(0.22f,0.20f,0.18f), 0f, 0.10f);
+        var matGold      = GetOrCreateMatURP("Mat_R2_Gold",      new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
+        var matCandle    = GetOrCreateMatURP("Mat_R2_Candle",    new Color(0.95f,0.92f,0.82f), 0f, 0.10f);
+        var matFlame     = GetOrCreateMatURP("Mat_R2_Flame",     new Color(1.00f,0.55f,0.05f), 0f, 0.0f,
+                               new Color(15.0f, 6.0f, 0.5f));
+
+        BuildAltar(room2Root, matStone, matDarkStone, matGold, matCandle, matFlame);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+        Debug.Log("[Room2Setup] Rebuild Altar 完了");
+    }
+
     // ── 祭壇（壮大版）──
     static void BuildAltar(GameObject room2Root, Material matStone, Material matDarkStone, Material matGold, Material matCandle, Material matFlame)
     {
@@ -1078,17 +1108,37 @@ public class Room2SetupEditor : EditorWindow
         CreateBox(altarRoot,"Altar_LockInsert",
             new Vector3(0f,1.7f,-0.56f), new Vector3(0.45f,0.35f,0.04f), matDarkStone);
 
-        // 天板上のロウソク（左右各2本）
+        // 天板上のロウソク（左右各2本）— Candelabra と同じ 2層スフィア構造 + Point Light
         float[] candleXs = { -0.68f, -0.35f, 0.35f, 0.68f };
+        var matAltarFlameCore = GetOrCreateMatURP("Mat_R2_FlameCore", new Color(1.0f,0.95f,0.8f), 0f, 0f,
+            new Color(30.0f, 20.0f, 6.0f));
+        ConfigureFlameMaterialAdditive(matFlame);
         for (int i = 0; i < 4; i++)
         {
             float x = candleXs[i];
             CreateCylinder(altarRoot,$"AltarCandle_{i}",
                 new Vector3(x,2.38f,0.1f), new Vector3(0.06f,0.12f,0.06f), matCandle);
-            var altFlame = CreateSphere(altarRoot,$"AltarFlame_{i}",
-                new Vector3(x,2.57f,0.1f), 0.09f, matFlame);
-            altFlame.transform.localScale = new Vector3(0.08f,0.14f,0.08f);
-            altFlame.SetActive(true);
+            // 親 GameObject で炎全体をまとめる
+            var altFlameRoot = new GameObject($"AltarFlame_{i}");
+            altFlameRoot.transform.SetParent(altarRoot.transform, false);
+            altFlameRoot.transform.localPosition = new Vector3(x, 2.57f, 0.1f);
+            altFlameRoot.SetActive(true);
+            // 外側オレンジ（加算ブレンド）
+            var altFlameOuter = CreateSphere(altFlameRoot,$"AltarFlame_{i}_Outer", Vector3.zero, 0.09f, matFlame);
+            altFlameOuter.transform.localScale = new Vector3(0.08f, 0.14f, 0.08f);
+            // 内側コア
+            var altFlameCore = CreateSphere(altFlameRoot,$"AltarFlame_{i}_Core",
+                new Vector3(0f, 0.015f, 0f), 0.05f, matAltarFlameCore);
+            altFlameCore.transform.localScale = new Vector3(0.04f, 0.10f, 0.04f);
+            // Point Light（Candelabra と同等）
+            var altFlameLightGO = new GameObject($"AltarFlame_{i}_Light");
+            altFlameLightGO.transform.SetParent(altFlameRoot.transform, false);
+            altFlameLightGO.transform.localPosition = new Vector3(0f, 0.05f, 0f);
+            var altFlameLight = altFlameLightGO.AddComponent<Light>();
+            altFlameLight.type = LightType.Point;
+            altFlameLight.color = new Color(1.0f, 0.65f, 0.20f);
+            altFlameLight.intensity = 1.5f;
+            altFlameLight.range = 4.0f;
         }
 
         // 聖水鉢（左右）
