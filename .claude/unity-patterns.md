@@ -297,3 +297,185 @@ CameraPoint だけ `EscapeGame/Reset Camera Point/{name}` メニューで個別�
 ## 気づいたことはここに追記
 
 <!-- 新しいNG/OKを見つけたらセクションに追加。日付も書くと振り返りやすい -->
+
+---
+
+## 【重要・絶対遵守】フォント関連メニューは原則使用禁止 (2026-05-14 追加)
+
+過去にプロジェクト UI が全文字化け→約30分の復旧作業を要する事故が発生した。
+
+### 禁止メニュー（叩くと壊れる）
+
+| メニュー | 何が起こるか | 影響範囲 |
+|---|---|---|
+| `EscapeGame/Setup/Apply Japanese Font to All TMP` | 全 TMP を **NotoSansJP_Dynamic（壊れている方）に切替** | シーン全体の TMP |
+| `EscapeGame/Font/Force Rebuild Atlas` | Dynamic の atlas texture を **破壊** | NotoSansJP_Dynamic.asset |
+| `EscapeGame/Font/Restore NotoSansJP` | 全 TMP を Dynamic に再設定（Apply Japanese Font と同じ） | シーン全体 |
+
+### 正しいフォント運用
+
+- プロジェクトの**健全な日本語フォントは `NotoSansJP_Fresh.asset`** のみ（`Dynamic` は事実上壊れている）
+- 新規 TMP を Editor スクリプトで作成する際は **必ず明示的にアサイン**：
+  ```csharp
+  var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
+  if (jpFont != null) tmp.font = jpFont;
+  ```
+- フォント警告が出ても**メニューで一括解決しようとしない**。1個ずつ Editor スクリプトで font 代入する
+
+### もし全文字化けが発生したら
+
+1. `git restore Assets/_Project/Scenes/StudyRoom.unity` でシーンを最後のコミットへ戻す
+2. `git restore Assets/_Project/Fonts/NotoSansJP_Dynamic.asset` で破損したアセットを戻す
+3. Unity がダイアログ「modified externally」を出すので **Reload** を押す
+4. 復旧確認
+
+---
+
+## Collider 2重問題：hit.collider 比較は危険 (2026-05-14 追加)
+
+### 症状
+
+`CreatePrimitive(Sphere)` 等で作ったオブジェクトに `AddBoxCollider` で BoxCollider を追加すると、**SphereCollider と BoxCollider が同居**する。Raycast クリック判定で：
+
+```csharp
+private void Awake() => col = GetComponent<Collider>();
+// ...
+if (hit.collider != col) return;  // ←NG！失敗する
+```
+
+`GetComponent<Collider>()` は先に追加された SphereCollider を返すが、`Physics.Raycast` は大きい方の BoxCollider にヒット → `hit.collider != col` で常に弾かれる。
+
+### OK パターン
+
+```csharp
+if (hit.transform != transform) return;  // 同 GameObject かどうか transform で比較
+```
+
+GameObject 比較なら collider が複数あっても OK。`Awake` での `col` 取得も不要。
+
+→ `CabinetCounterButton.cs`, `CabinetLever.cs` でこのパターンを採用。
+
+---
+
+## 親回転下の TextMeshPro 3D は読み方向が反転する (2026-05-14 追加)
+
+### 症状
+
+cabRoot (Y=90 回転) の子に TextMeshPro (3D) を配置すると、テキストが **右→左方向で描画され、カメラから見ると鏡文字**になる。
+
+### 原因
+
+TMP 3D のテキスト読み方向はローカル +X。親の Y=90 回転で local +X が world -Z にマップされ、カメラの「右」(world +Z) と逆向きになる。
+
+### OK パターン
+
+TMP の `localEulerAngles = (0, 180, 0)` を設定して、読み方向をカメラ視点で正しい向きに反転：
+
+```csharp
+var dispGO = new GameObject(name + "_Disp");
+dispGO.transform.SetParent(parent.transform, false);
+dispGO.transform.localEulerAngles = new Vector3(0f, 180f, 0f); // ← 親 Y=90 補正
+var tmp = dispGO.AddComponent<TextMeshPro>();
+```
+
+→ 食器棚解錠装置のカウンタ表示・レバーラベルでこのパターンを採用。
+
+---
+
+## ItemDetailUI にはアイコン Image が必要 (2026-05-14 追加)
+
+### 経緯
+
+ItemDetailUI は当初「名前 + 説明」のみ表示で、ItemData.icon を**どこにも表示していなかった**。視覚的ヒントが必要なアイテム（凹凸パターンの蝋板など）が完全に意味を失う。
+
+### 拡張パターン
+
+- `ItemDetailUI` に `[SerializeField] private Image iconImage;` を追加
+- `Show(ItemData)` で `iconImage.sprite = item.Icon` を設定
+- パネルレイアウトを「名前（上）/ アイコン（中央、preserveAspect=true）/ 説明（下）」3段に
+- 説明文が空でもアイコンだけで意味が伝わる
+
+### 取得時の自動表示
+
+パズル解錠で取得物を渡す側で `ItemDetailUI.Show()` を直接呼ぶ：
+
+```csharp
+InventoryManager.Instance?.AddItem(item);
+FindAnyObjectByType<ItemDetailUI>()?.Show(item);
+```
+
+これでプレイヤーが「何を入手したか」を必ず目視できる。
+
+---
+
+## URP/Lit を加算ブレンドに切り替える（炎用） (2026-05-14 追加)
+
+外側スフィア（不透明な URP/Lit）で内側の高輝度コアが隠れる問題。
+
+### コードで設定する加算ブレンド
+
+```csharp
+static void ConfigureFlameMaterialAdditive(Material mat)
+{
+    mat.SetFloat("_Surface", 1f);                     // 1 = Transparent
+    mat.SetFloat("_Blend", 2f);                        // 2 = Additive
+    mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+    mat.SetFloat("_DstBlend", (float)BlendMode.One);
+    mat.SetFloat("_ZWrite", 0f);
+    mat.SetOverrideTag("RenderType", "Transparent");
+    mat.renderQueue = 3000;
+    mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+    mat.DisableKeyword("_ALPHATEST_ON");
+    EditorUtility.SetDirty(mat);
+}
+```
+
+これで外側スフィアの色が「加算」され、奥にある内側コアの emission も画面に重なって光って見える。
+
+---
+
+## 【絶対遵守】指示外の変更を加えない (2026-05-14 追加)
+
+> 「先祖返り（指示なしの変更）」は信頼を毀損する最大要因。
+
+### 過去の事故例
+
+- ユーザー指示: 「蝋燭は壁付け燭台の炎と同じ**光**を使う」
+- 誤った対応: 「光」を「見た目全体」と拡大解釈し、内側コアスフィアを**勝手に削除**
+- 結果: ユーザーの意図と逆方向の変更で激怒
+- 教訓: 「光」=「Point Light のパラメータ」と最小限解釈すべきだった
+
+### ルール
+
+1. **指示された範囲のみ**変更する。拡大解釈しない
+2. 過去ユーザーが確定させた状態（git にコミット済み）は**指示なく触らない**
+3. 不明確な指示はその場で**選択肢を提示して確認**する
+4. 「ついでに〇〇も直そう」は禁止。別タスクとして提案だけする
+
+---
+
+## 取得物のヒントを難しくしたい時のテンプレート (2026-05-14 追加)
+
+食器棚→燭台パズルで採用したパターン（テキストヒントなし、視覚記号と現物の照合のみ）。
+
+### 構成要素
+
+1. **取得アイテム (ItemData)**: アイコンに「**抽象的な凹凸パターン**」だけ描く
+   - 高い要素 = 目立つ色（赤）、低い要素 = 暗い色
+   - 説明文は**空**にする
+2. **ターゲット側オブジェクト (3D)**: アイコンと**同じパターンの物理的な高さ差**を付ける
+   - 例: 蝋燭の高さを `0.28`（高） / `0.14`（低） に
+   - 受け皿/土台の位置は変えず、蝋燭の底だけ揃える
+3. **プレイヤーの導線**:
+   - 取得 → アイコンを ItemDetailUI で**強制表示**して観察を促す
+   - インベントリ再クリックでいつでも見返せる
+   - 答えはアイコン + 現物の照合でしか得られない
+
+### この方法の利点
+
+- テキストヒントゼロ → 直接答えを書いていないので難度が高い
+- 「アイコンと現物の対応」を発見する瞬間がエスケープゲーム的快感
+- 別言語にも自然に対応（凹凸パターンは言語非依存）
+
