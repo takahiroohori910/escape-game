@@ -3,11 +3,10 @@ using EscapeGame.Core;
 
 namespace EscapeGame.Game
 {
-    // 本棚・机の2謎クリア後に鍵を付与する。扉は最初から表示済み。
+    // チェスト解錠フラグを監視して Room1Cleared を確定する。
+    // 鍵は ChestPuzzle 側で付与（ItemDetailUI で表示）。ここでは進行表示は行わない。
     public class Room1ClearManager : MonoBehaviour
     {
-        [SerializeField] private ItemData roomKeyItem;
-
         private bool given;
 
         private void Start()
@@ -23,34 +22,21 @@ namespace EscapeGame.Game
 
         private void OnFlagChanged(string flagId, bool value)
         {
-            if (flagId == Flags.BookshelfSolved || flagId == Flags.DeskSolved)
-                CheckClear();
+            if (flagId == Flags.ChestSolved) CheckClear();
         }
 
         private void CheckClear()
         {
-            if (!FlagManager.Instance.HasFlag(Flags.BookshelfSolved)) return;
-            if (!FlagManager.Instance.HasFlag(Flags.DeskSolved)) return;
-            GiveKey();
+            if (!FlagManager.Instance.HasFlag(Flags.ChestSolved)) return;
+            MarkCleared();
         }
 
-        public void GiveKey()
+        public void MarkCleared()
         {
             if (given) return;
             given = true;
-
             FlagManager.Instance.SetFlag(Flags.Room1Cleared);
-            InventoryManager.Instance.AddItem(roomKeyItem);
-            AudioManager.Instance?.PlaySE("SE_PuzzleSolve");
-
-            PopupUI.Instance?.Show("机の引き出しの奥から鍵が出てきた！\n奥の扉に使えそうだ……", 4f);
-            Invoke(nameof(ReturnToOverview), 1.5f);
-            Debug.Log("[Room1ClearManager] 本棚+机クリア！鍵を付与");
-        }
-
-        private void ReturnToOverview()
-        {
-            RoomViewController.Instance?.MoveToCurrentOverview();
+            Debug.Log("[Room1ClearManager] チェスト解錠でクリア状態へ");
         }
     }
 }

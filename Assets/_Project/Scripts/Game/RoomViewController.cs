@@ -13,6 +13,7 @@ namespace EscapeGame.Game
         [SerializeField] private Transform bookshelfPoint;
         [SerializeField] private Transform deskPoint;
         [SerializeField] private Transform fireplacePoint;
+        [SerializeField] private Transform chestPoint;
 
         [Header("Room2 カメラポイント")]
         [SerializeField] private Transform overview2Point;
@@ -100,6 +101,7 @@ namespace EscapeGame.Game
             RoomArea.Bookshelf       => bookshelfPoint,
             RoomArea.Desk            => deskPoint,
             RoomArea.Fireplace       => fireplacePoint,
+            RoomArea.Chest           => chestPoint,
             RoomArea.Overview2       => overview2Point,
             RoomArea.StainedGlass    => stainedGlassPoint,
             RoomArea.DisplayCabinet  => displayCabinetPoint,

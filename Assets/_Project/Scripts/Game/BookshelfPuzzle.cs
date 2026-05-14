@@ -11,6 +11,7 @@ namespace EscapeGame.Game
         // 色インデックス: 0=赤, 1=青, 2=緑
         [SerializeField] private int[] correctOrder = { 1, 0, 2 };
         [SerializeField] private int[] currentOrder  = { 0, 1, 2 };
+        [SerializeField] private ItemData hintItem; // チェスト解錠用ヒントメモ（暗号A：順序）
 
         public static readonly string[] ColorNames = { "赤", "青", "緑" };
         public static readonly Color[]  BookColors  =
@@ -62,7 +63,13 @@ namespace EscapeGame.Game
             FlagManager.Instance.SetFlag(Flags.BookshelfSolved);
             AudioManager.Instance?.PlaySE("SE_PuzzleSolve");
             OnSolved.Invoke();
-            Debug.Log("[BookshelfPuzzle] 解決！受話器コードを入手");
+
+            if (hintItem != null)
+            {
+                InventoryManager.Instance?.AddItem(hintItem);
+                FindAnyObjectByType<ItemDetailUI>()?.Show(hintItem);
+            }
+            Debug.Log("[BookshelfPuzzle] 解錠！シンボル順序ヒントを入手");
         }
     }
 }

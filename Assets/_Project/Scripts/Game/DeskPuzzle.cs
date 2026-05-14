@@ -9,6 +9,7 @@ namespace EscapeGame.Game
     public class DeskPuzzle : MonoBehaviour
     {
         [SerializeField] private string correctCode = "1130";
+        [SerializeField] private ItemData hintItem; // チェスト解錠用ヒントメモ（暗号B：シンボル凡例）
 
         private string enteredCode = "";
         private bool isSolved;
@@ -38,8 +39,15 @@ namespace EscapeGame.Game
 
             isSolved = true;
             FlagManager.Instance.SetFlag(Flags.DeskSolved);
+            AudioManager.Instance?.PlaySE("SE_PuzzleSolve");
             OnSolved.Invoke();
-            Debug.Log("[DeskPuzzle] 解決！内部基板を入手");
+
+            if (hintItem != null)
+            {
+                InventoryManager.Instance?.AddItem(hintItem);
+                FindAnyObjectByType<ItemDetailUI>()?.Show(hintItem);
+            }
+            Debug.Log("[DeskPuzzle] 解錠！シンボル凡例を入手");
         }
     }
 }

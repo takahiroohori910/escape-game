@@ -6,6 +6,7 @@ namespace EscapeGame.Game
         // Room1
         public const string BookshelfSolved  = "bookshelf_solved";
         public const string DeskSolved       = "desk_solved";
+        public const string ChestSolved      = "chest_solved";
         public const string PhoneRepaired    = "phone_repaired";
         public const string ClockInspected   = "clock_inspected";
         public const string HiddenBookRead   = "hidden_book_read";
@@ -23,6 +24,8 @@ namespace EscapeGame.Game
         public const string CircuitBoard = "circuit_board";
         public const string RoomKey      = "room_key";
         public const string FlamePattern = "flame_pattern"; // 食器棚解錠で入手、燭台パズルのヒント
+        public const string ChestHintOrder  = "chest_hint_order";  // 本棚解錠で入手：シンボル順序（暗号A）
+        public const string ChestHintLegend = "chest_hint_legend"; // 机金庫解錠で入手：シンボル凡例（暗号B）
     }
 
     // カメラが映すエリアの定義
@@ -32,7 +35,8 @@ namespace EscapeGame.Game
         Overview,       // 部屋全体（初期視点）
         Bookshelf,      // 本棚エリア
         Desk,           // デスクエリア
-        Fireplace,      // 暖炉エリア
+        Fireplace,      // 暖炉エリア（撤去予定、互換のため残置）
+        Chest,          // チェスト（暖炉跡）エリア
         // Room2
         Overview2,      // 祭壇の間（全体視点）
         StainedGlass,   // ステンドグラスエリア
