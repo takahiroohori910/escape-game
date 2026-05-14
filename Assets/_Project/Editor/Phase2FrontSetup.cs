@@ -180,6 +180,10 @@ public class Phase2FrontSetup
         var existing = GameObject.Find("ItemDetailPanel");
         if (existing != null) Object.DestroyImmediate(existing);
 
+        // 日本語フォント（NotoSansJP_Fresh）を読み込む。なければ警告のみで続行（英字 LiberationSans フォールバック）
+        var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
+        if (jpFont == null) Debug.LogWarning("[P2Front] NotoSansJP_Fresh.asset が見つかりません。日本語が□表示になる可能性があります");
+
         // パネルを少し大きくしてアイコンを収容
         var panel = CreateUIObj("ItemDetailPanel", canvas, 520, 260);
         var rt = panel.GetComponent<RectTransform>();
@@ -193,6 +197,7 @@ public class Phase2FrontSetup
         nameRt.anchorMin = nameRt.anchorMax = new Vector2(0.5f, 1f);
         nameRt.anchoredPosition = new Vector2(0, -30f);
         var nameTmp = nameGO.AddComponent<TextMeshProUGUI>();
+        if (jpFont != null) nameTmp.font = jpFont;
         nameTmp.fontSize = 28;
         nameTmp.color = new Color(1f, 0.9f, 0.5f);
         nameTmp.fontStyle = FontStyles.Bold;
@@ -213,6 +218,7 @@ public class Phase2FrontSetup
         descRt.anchorMin = descRt.anchorMax = new Vector2(0.5f, 0f);
         descRt.anchoredPosition = new Vector2(0, 28f);
         var descTmp = descGO.AddComponent<TextMeshProUGUI>();
+        if (jpFont != null) descTmp.font = jpFont;
         descTmp.fontSize = 20;
         descTmp.color = new Color(0.8f, 0.8f, 0.8f);
         descTmp.alignment = TextAlignmentOptions.Center;
