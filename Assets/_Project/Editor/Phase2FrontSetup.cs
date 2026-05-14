@@ -8,6 +8,19 @@ using UnityEngine.UI;
 
 public class Phase2FrontSetup
 {
+    // ItemDetailUI（アイコン対応）だけ再構築（Phase2 Front Setup フルランを避けたい時用）
+    [MenuItem("EscapeGame/Setup/Rebuild ItemDetailUI")]
+    public static void RebuildItemDetailUI()
+    {
+        var canvas = GameObject.Find("Canvas_Main");
+        if (canvas == null) { Debug.LogError("[P2Front] Canvas_Main が見つかりません"); return; }
+        var managers = GameObject.Find("Managers");
+        if (managers == null) { Debug.LogError("[P2Front] Managers が見つかりません"); return; }
+        SetupItemDetailUI(canvas, managers);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+        Debug.Log("[P2Front] ItemDetailUI 再構築完了");
+    }
+
     [MenuItem("EscapeGame/Setup/Phase2 Front Setup")]
     public static void Run()
     {
@@ -167,28 +180,40 @@ public class Phase2FrontSetup
         var existing = GameObject.Find("ItemDetailPanel");
         if (existing != null) Object.DestroyImmediate(existing);
 
-        var panel = CreateUIObj("ItemDetailPanel", canvas, 500, 150);
+        // パネルを少し大きくしてアイコンを収容
+        var panel = CreateUIObj("ItemDetailPanel", canvas, 520, 260);
         var rt = panel.GetComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.anchoredPosition = new Vector2(0, 115f);
+        rt.anchoredPosition = new Vector2(0, 175f);
         panel.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.92f);
 
-        var nameGO = CreateUIObj("ItemName", panel, 480, 56);
+        // 名前（上部）
+        var nameGO = CreateUIObj("ItemName", panel, 480, 48);
         var nameRt = nameGO.GetComponent<RectTransform>();
         nameRt.anchorMin = nameRt.anchorMax = new Vector2(0.5f, 1f);
-        nameRt.anchoredPosition = new Vector2(0, -32f);
+        nameRt.anchoredPosition = new Vector2(0, -30f);
         var nameTmp = nameGO.AddComponent<TextMeshProUGUI>();
         nameTmp.fontSize = 28;
         nameTmp.color = new Color(1f, 0.9f, 0.5f);
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.alignment = TextAlignmentOptions.Center;
 
-        var descGO = CreateUIObj("ItemDesc", panel, 480, 60);
+        // アイコン（中央）
+        var iconGO = CreateUIObj("ItemIcon", panel, 140, 105);
+        var iconRt = iconGO.GetComponent<RectTransform>();
+        iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRt.anchoredPosition = new Vector2(0, 0f);
+        var iconImg = iconGO.AddComponent<Image>();
+        iconImg.preserveAspect = true;
+        iconImg.color = Color.white;
+
+        // 説明（下部）
+        var descGO = CreateUIObj("ItemDesc", panel, 480, 50);
         var descRt = descGO.GetComponent<RectTransform>();
         descRt.anchorMin = descRt.anchorMax = new Vector2(0.5f, 0f);
-        descRt.anchoredPosition = new Vector2(0, 24f);
+        descRt.anchoredPosition = new Vector2(0, 28f);
         var descTmp = descGO.AddComponent<TextMeshProUGUI>();
-        descTmp.fontSize = 22;
+        descTmp.fontSize = 20;
         descTmp.color = new Color(0.8f, 0.8f, 0.8f);
         descTmp.alignment = TextAlignmentOptions.Center;
         descTmp.textWrappingMode = TextWrappingModes.Normal;
@@ -197,9 +222,10 @@ public class Phase2FrontSetup
 
         var ui = managers.GetComponent<ItemDetailUI>() ?? managers.AddComponent<ItemDetailUI>();
         var so = new SerializedObject(ui);
-        so.FindProperty("panel").objectReferenceValue    = panel;
-        so.FindProperty("nameText").objectReferenceValue = nameTmp;
-        so.FindProperty("descText").objectReferenceValue = descTmp;
+        so.FindProperty("panel").objectReferenceValue     = panel;
+        so.FindProperty("nameText").objectReferenceValue  = nameTmp;
+        so.FindProperty("descText").objectReferenceValue  = descTmp;
+        so.FindProperty("iconImage").objectReferenceValue = iconImg;
         so.ApplyModifiedProperties();
     }
 

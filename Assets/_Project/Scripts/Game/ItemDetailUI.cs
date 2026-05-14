@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 using EscapeGame.Core;
 
@@ -11,6 +12,7 @@ namespace EscapeGame.Game
         [SerializeField] private GameObject panel;
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI descText;
+        [SerializeField] private Image iconImage;
 
         private bool showedThisFrame;
 
@@ -21,6 +23,11 @@ namespace EscapeGame.Game
             if (item == null) { Hide(); return; }
             nameText.text = item.ItemName;
             descText.text = item.Description;
+            if (iconImage != null)
+            {
+                iconImage.sprite = item.Icon;
+                iconImage.enabled = item.Icon != null;
+            }
             panel.SetActive(true);
             showedThisFrame = true;
         }

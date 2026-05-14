@@ -55,8 +55,12 @@ namespace EscapeGame.Game
                 AudioManager.Instance?.PlaySE("SE_PuzzleSolve");
                 OnSolved?.Invoke();
 
-                if (cabinetHintItem != null && InventoryManager.Instance != null)
-                    InventoryManager.Instance.AddItem(cabinetHintItem);
+                if (cabinetHintItem != null)
+                {
+                    InventoryManager.Instance?.AddItem(cabinetHintItem);
+                    // 取得時にアイテム詳細を表示（プレイヤーが凹凸パターンを目視確認できるように）
+                    FindAnyObjectByType<ItemDetailUI>()?.Show(cabinetHintItem);
+                }
 
                 Debug.Log("[DisplayCabinetPuzzle] 解決！蝋板アイテムを入手");
             }
