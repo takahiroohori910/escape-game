@@ -203,20 +203,20 @@ public class Phase2FrontSetup
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.alignment = TextAlignmentOptions.Center;
 
-        // アイコン（中央）
-        var iconGO = CreateUIObj("ItemIcon", panel, 140, 105);
+        // アイコン（上部寄り：名前の下）
+        var iconGO = CreateUIObj("ItemIcon", panel, 130, 100);
         var iconRt = iconGO.GetComponent<RectTransform>();
-        iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
-        iconRt.anchoredPosition = new Vector2(0, 0f);
+        iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 1f);
+        iconRt.anchoredPosition = new Vector2(0, -110f);
         var iconImg = iconGO.AddComponent<Image>();
         iconImg.preserveAspect = true;
         iconImg.color = Color.white;
 
-        // 説明（下部）
-        var descGO = CreateUIObj("ItemDesc", panel, 480, 50);
+        // 説明（下半分中央：パネル下半分を広く使う）
+        var descGO = CreateUIObj("ItemDesc", panel, 480, 110);
         var descRt = descGO.GetComponent<RectTransform>();
         descRt.anchorMin = descRt.anchorMax = new Vector2(0.5f, 0f);
-        descRt.anchoredPosition = new Vector2(0, 28f);
+        descRt.anchoredPosition = new Vector2(0, 70f);
         var descTmp = descGO.AddComponent<TextMeshProUGUI>();
         if (jpFont != null) descTmp.font = jpFont;
         descTmp.fontSize = 20;

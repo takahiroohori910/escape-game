@@ -71,13 +71,13 @@ namespace EscapeGame.EditorTools
 
             var itemOrder = EnsureItemData(
                 "ChestHintOrder", ItemIds.ChestHintOrder,
-                "順序の手帳",
-                "古びた手帳の切れ端。\n「絵柄を 月 → 花 → 雲 → 月 → 花 の順に呼べ」",
+                "古びた手帳の切れ端",
+                "「絵柄を 月 → 花 → 雲 → 月 → 花 の順に呼べ」",
                 iconOrder);
             var itemLegend = EnsureItemData(
                 "ChestHintLegend", ItemIds.ChestHintLegend,
-                "凡例の暗号文",
-                "羊皮紙に絵柄と段の対応。\n月  =  上段\n雲  =  中段\n花  =  下段",
+                "謎のメモ",
+                "月  =  上段\n雲  =  中段\n花  =  下段",
                 iconLegend);
 
             // 暖炉群を非アクティブ化（破壊はせず復元可能に）

@@ -8,8 +8,8 @@ namespace EscapeGame.Game
     // 正解: 青(1)→赤(0)→緑(2)
     public class BookshelfPuzzle : MonoBehaviour
     {
-        // 色インデックス: 0=赤, 1=青, 2=緑
-        [SerializeField] private int[] correctOrder = { 1, 0, 2 };
+        // 色インデックス: 0=赤, 1=青, 2=緑。正解は 赤→緑→青（壁の風景画が左→右に赤緑青を示唆）
+        [SerializeField] private int[] correctOrder = { 0, 2, 1 };
         [SerializeField] private int[] currentOrder  = { 0, 1, 2 };
         [SerializeField] private ItemData hintItem; // チェスト解錠用ヒントメモ（暗号A：順序）
 

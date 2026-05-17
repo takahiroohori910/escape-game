@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: ChestHintOrder
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.ItemData
   itemId: chest_hint_order
-  itemName: "\u9806\u5E8F\u306E\u624B\u5E33"
-  description: "\u53E4\u3073\u305F\u624B\u5E33\u306E\u5207\u308C\u7AEF\u3002\n\u300C\u7D75\u67C4\u3092
-    \u6708 \u2192 \u82B1 \u2192 \u96F2 \u2192 \u6708 \u2192 \u82B1 \u306E\u9806\u306B\u547C\u3079\u300D"
+  itemName: "\u53E4\u3073\u305F\u624B\u5E33\u306E\u5207\u308C\u7AEF"
+  description: "\u300C\u7D75\u67C4\u3092 \u6708 \u2192 \u82B1 \u2192 \u96F2 \u2192
+    \u6708 \u2192 \u82B1 \u306E\u9806\u306B\u547C\u3079\u300D"
   icon: {fileID: 0}
   craftingIngredients: []
   craftingResult: {fileID: 0}

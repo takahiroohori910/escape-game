@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: ChestHintLegend
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.ItemData
   itemId: chest_hint_legend
-  itemName: "\u51E1\u4F8B\u306E\u6697\u53F7\u6587"
-  description: "\u7F8A\u76AE\u7D19\u306B\u7D75\u67C4\u3068\u6BB5\u306E\u5BFE\u5FDC\u3002\n\u6708 
-    =  \u4E0A\u6BB5\n\u96F2  =  \u4E2D\u6BB5\n\u82B1  =  \u4E0B\u6BB5"
+  itemName: "\u8B0E\u306E\u30E1\u30E2"
+  description: "\u6708  =  \u4E0A\u6BB5\n\u96F2  =  \u4E2D\u6BB5\n\u82B1  =  \u4E0B\u6BB5"
   icon: {fileID: 0}
   craftingIngredients: []
   craftingResult: {fileID: 0}
