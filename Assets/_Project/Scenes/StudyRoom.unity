@@ -39701,7 +39701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.NoteInteractable
   noteData: {fileID: 11400000, guid: a9d66c8e41de74ad6a0fcc255a6a26f0, type: 2}
-  requiredArea: 6
+  requiredArea: 7
 --- !u!23 &346331999
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -69150,7 +69150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbc5a7ee1a9db46dabc1ceaf14b00443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.AreaClickZone
-  targetArea: 9
+  targetArea: 10
   requiredFlag: portrait_solved
   blockedMessage: "\u796D\u58C7\u306B\u306F\u5C01\u5370\u304C\u65BD\u3055\u308C\u3066\u3044\u308B\u3002\n\u307E\u3060\u8FD1\u3065\u304B\u306A\u3044\u65B9\u304C\u826F\u3055\u305D\u3046\u3060\u3002"
 --- !u!65 &588878664
@@ -153812,7 +153812,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.NoteInteractable
   noteData: {fileID: 11400000, guid: 66e3e5b773945400c9e2f919d3bb2918, type: 2}
-  requiredArea: 5
+  requiredArea: 6
 --- !u!65 &1346883298
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -169251,7 +169251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbc5a7ee1a9db46dabc1ceaf14b00443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.AreaClickZone
-  targetArea: 7
+  targetArea: 8
   requiredFlag: 
   blockedMessage: 
 --- !u!65 &1491217761
@@ -213234,7 +213234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbc5a7ee1a9db46dabc1ceaf14b00443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.AreaClickZone
-  targetArea: 5
+  targetArea: 6
   requiredFlag: 
   blockedMessage: 
 --- !u!65 &1888752147
@@ -228814,7 +228814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbc5a7ee1a9db46dabc1ceaf14b00443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.AreaClickZone
-  targetArea: 8
+  targetArea: 9
   requiredFlag: 
   blockedMessage: 
 --- !u!65 &1985949282
