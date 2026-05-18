@@ -28,6 +28,7 @@ public class AudioSetup
         Assign(so, "seNoteOpen",    seDir + "SE_NoteOpen");
         Assign(so, "sePhoneRepair", seDir + "SE_PhoneRepair");
         Assign(so, "sePhoneCall",   seDir + "SE_PhoneCall");
+        Assign(so, "seDoorOpen",    seDir + "SE_DoorOpen");
 
         so.ApplyModifiedProperties();
         EditorUtility.SetDirty(am);

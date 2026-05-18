@@ -22,6 +22,7 @@ namespace EscapeGame.Core
         [SerializeField] private AudioClip seNoteOpen;
         [SerializeField] private AudioClip sePhoneRepair;
         [SerializeField] private AudioClip sePhoneCall;
+        [SerializeField] private AudioClip seDoorOpen;
 
         [Header("Settings")]
         [SerializeField] [Range(0f, 1f)] private float bgmVolume = 0.4f;
@@ -69,6 +70,7 @@ namespace EscapeGame.Core
                 { "SE_NoteOpen",     seNoteOpen    },
                 { "SE_PhoneRepair",  sePhoneRepair },
                 { "SE_PhoneCall",    sePhoneCall   },
+                { "SE_DoorOpen",     seDoorOpen    },
             };
         }
 
