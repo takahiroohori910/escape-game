@@ -18,12 +18,16 @@ namespace EscapeGame.Game
         private void Update()
         {
             if (RoomViewController.Instance == null) return;
-            col.enabled = RoomViewController.Instance.IsOverview;
+            // Title overlay 表示中は Unity の OnMouseDown が UI Raycast を貫通して
+            // 誤発火するため、Collider 自体を無効化して防ぐ
+            bool titleShown = TitleUI.Instance != null && TitleUI.Instance.IsShowing;
+            col.enabled = RoomViewController.Instance.IsOverview && !titleShown;
         }
 
         private void OnMouseDown()
         {
             if (!RoomViewController.Instance.IsOverview) return;
+            if (TitleUI.Instance != null && TitleUI.Instance.IsShowing) return;
 
             if (!string.IsNullOrEmpty(requiredFlag) && !FlagManager.Instance.HasFlag(requiredFlag))
             {
