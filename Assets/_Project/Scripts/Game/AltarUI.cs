@@ -53,7 +53,7 @@ namespace EscapeGame.Game
             string code = puzzle.GetEnteredCode();
             string display = "";
             for (int i = 0; i < 4; i++)
-                display += (i < code.Length ? code[i].ToString() : "—") + (i < 3 ? "  " : "");
+                display += (i < code.Length ? code[i].ToString() : "_") + (i < 3 ? "  " : "");
             codeDisplay.text = display;
         }
 
