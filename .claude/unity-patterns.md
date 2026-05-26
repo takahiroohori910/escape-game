@@ -54,6 +54,25 @@ NGパターンを踏んだときは即このファイルに追記すること。
 | `FindObjectsByType<T>(FindObjectsSortMode)` | `FindObjectsByType<T>()` | FindObjectsSortMode 版が deprecated |
 | `TMP_Text.enableWordWrapping` | `TMP_Text.textWrappingMode` | Unity 6 で deprecated |
 
+### 3D オブジェクトのクリック検知（OnMouseDown 周り）
+
+| NG | OK | 理由 |
+|---|---|---|
+| `OnMouseDown` で UI 上クリックを受け取る | 冒頭で `if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;` で早期 return（暫定対処）／本来は `IPointerClickHandler` + `Physics Raycaster` へ移行 | OnMouseDown は UI Raycast を**貫通する**ため、UI ボタン背後の 3D Collider が誤発火する |
+| `MonoBehaviour.enabled = false` だけで OnMouseDown を止めたつもり | **Collider 自体を `enabled = false` にする、もしくはコンポーネントごと削除** | enabled=false の MonoBehaviour でも、同じ GameObject に有効な Collider があると OnMouseDown が呼ばれることがある |
+| BoxCollider だけ無効化して安心する | **同一 GameObject 上の全 Collider（MeshCollider / MeshRenderer 兼用等）を確認** | SG_Canvas は BoxCollider 以外に MeshCollider も持っていて、MeshCollider 経由で OnMouseDown が発火した実例あり |
+| シーンファイルから m_Component リスト除去だけで「削除」 | **コンポーネント定義ブロック（`--- !u!XX &fileID` から次の `---` まで）も完全削除** | orphan のコンポーネント定義が残っていると、Unity がシーンロード時に自動で GameObject に再付与する |
+| `HoverHighlight` 等のホバー演出を Overview 中も有効にする | `RoomViewController.Instance.IsOverview` チェックで早期 return | Overview ではエリア内オブジェクトは操作対象外。光らせると「クリックできそう」と誤解される |
+
+### 名前 / パスの参照（文字列直書き禁止）
+
+| NG | OK | 理由 |
+|---|---|---|
+| `GameObject.Find("Canvas_Main")` | `GameObject.Find(SceneNames.CanvasMain)` | リネーム時に全置換が必要になる。SceneNames に集約していれば const 値変更のみで追従 |
+| `AssetDatabase.LoadAssetAtPath<T>("Assets/.../Foo.asset")` | `AssetDatabase.LoadAssetAtPath<T>(AssetPaths.Foo)` | パス変更時に複数ファイルを書き換える羽目になる |
+| `GameObject.FindWithTag("MainCamera")` | `GameObject.FindWithTag(SceneNames.Tag_MainCamera)` | タグも同じ扱い |
+| シーン側 GameObject 名のリネーム時、コードを置き換えずに名前だけ変える | **SceneNames の const 値を変える + Editor スクリプトで一括 Rename** | コードと実際の名前が乖離して Find が永遠に失敗する |
+
 ---
 
 ## 推奨パターン集
@@ -478,4 +497,111 @@ static void ConfigureFlameMaterialAdditive(Material mat)
 - テキストヒントゼロ → 直接答えを書いていないので難度が高い
 - 「アイコンと現物の対応」を発見する瞬間がエスケープゲーム的快感
 - 別言語にも自然に対応（凹凸パターンは言語非依存）
+
+---
+
+## シーン YAML 直接編集の安全手順 (2026-05-26 追加)
+
+重複名 GameObject や orphan コンポーネントの除去で、MCP の delete_gameobject では誤対象を選ぶリスクがあるとき、シーンファイル (`.unity`) を直接編集する選択肢を取る。その際の必須手順。
+
+### 編集前に確認すること
+
+1. **fileID と GameObject のマッピングを grep で全列挙**
+
+   ```bash
+   grep -n "m_Name: XXX" Assets/_Project/Scenes/StudyRoom.unity
+   ```
+
+   重複している場合は周辺を Read して、各 fileID が現役か orphan かを判定。
+
+2. **fileID `&XXXXXX` の型を判定**
+
+   YAML の `--- !u!N &XXXXXX` の N が型番号：
+
+   - `!u!1` = GameObject
+   - `!u!4` = Transform
+   - `!u!23` = MeshRenderer
+   - `!u!33` = MeshFilter
+   - `!u!64` = MeshCollider
+   - `!u!65` = BoxCollider
+   - `!u!114` = MonoBehaviour（独自スクリプト含む）
+   - `!u!222` = CanvasRenderer
+   - `!u!224` = RectTransform
+
+   削除する前に「これは何のコンポーネントか」を必ず確認する（過去 MeshRenderer を MeshCollider と誤認して消し、シーンが描画不能になった事故あり）。
+
+3. **参照漏れを grep でチェック**
+
+   ```bash
+   grep -nc "fileID: XXXXXX" Assets/_Project/Scenes/StudyRoom.unity
+   ```
+
+   削除予定 fileID を参照する他オブジェクトが残っていないか確認。
+
+### 編集の必須セット
+
+コンポーネントを 1 つ「消した」つもりで動かないときの正しい消し方：
+
+1. **GameObject の m_Component 配列から fileID 行を除去**
+2. **対応するコンポーネント定義ブロック（`--- !u!XX &fileID` から次の `---` の直前まで）を完全削除**
+
+m_Component から外しただけで定義を残すと、Unity がシーンロード時に「m_GameObject が指す GameObject に属するべき孤立コンポーネント」を検知して**自動で再付与する**。これで何度消しても復活する事故が起きる。
+
+### 編集後の反映
+
+Unity が起動中なら：
+
+1. シーンファイルを編集すると Unity が「The open scene(s) have been modified externally」ダイアログを出す
+2. **必ず Reload を選ぶ**（Ignore を選ぶとメモリ上の古い状態が残り、次の save_scene で編集が上書きで消える）
+3. Reload されない場合は `mcp__mcp-unity__load_scene` で強制再ロード
+
+### MCP との使い分け
+
+- **MCP 経由 (update_component / set_transform 等)**: 値の単純変更。Reload ダイアログが出ない
+- **シーン YAML 直接編集**: 重複名の選別削除、orphan コンポーネント除去、構造変更。Reload 必須
+
+---
+
+## 命名 / パス参照の集約 (2026-05-26 追加)
+
+`Assets/_Project/Scripts/Core/SceneNames.cs` と `AssetPaths.cs` に GameObject 名・アセットパスの const を集約してある。
+
+### 必須ルール
+
+- **新しい GameObject.Find や LoadAssetAtPath を追加するときは、先に SceneNames / AssetPaths に const を追加する**
+- コード内に文字列リテラルを直書きしない（grep で発見次第、const 経由に書き換え）
+- リネームしたい時は const の値を変更 → 必要に応じてシーン側 GameObject 名も Editor スクリプトで一括 Rename
+
+### 例外（const 化対象外）
+
+- 動的に番号を埋め込むテンプレート（例: `$"Candle_{i}_Stick"`）→ `SceneNames.CandleStickFormat = "Candle_{0}_Stick"` のように format 文字列として持つ
+- フォントアセットの内部参照名（TMP の動的アトラスが英数字を要求する場合）→ 英数字維持
+
+### 命名規則
+
+シーン GameObject 名は **日本語**（メインキャンバス、ヒントパネル、本棚 等）。  
+const 名と C# 識別子は英語のまま。  
+アセットファイル名も日本語化済み（壁マテリアル_生成.mat、ステンドグラス銘板メモ.asset 等）。  
+フォントアセットだけ英数字維持（NotoSansJP_Fresh.asset）。
+
+---
+
+## 大型未使用アセットの管理 (2026-05-26 追加)
+
+外部 Asset Pack（Furniture Mega Pack 等）の未使用ファイルが `Library/Artifacts` を肥大化させる。
+
+### 退避手順
+
+1. Editor スクリプトで `AssetDatabase.GetDependencies(usedPrefab, recursive: true)` を実行し、実使用ファイル一覧を取得
+2. Unity を終了
+3. パック全体を `/Users/ohori/Documents/Claude/EscapeGame_Archive/` に物理 move
+4. 実使用ファイル + フォルダ階層 + 各 .meta だけ元の場所に戻す（GUID 維持される）
+5. `Library/Artifacts/` を削除（古いキャッシュ除去）
+6. Unity 再起動 → Artifacts が縮小版で再生成
+
+### 重要
+
+- `Library/PackageCache/` は削除しない（再ダウンロードが必要）
+- `Assets/Furniture Mega Pack/` は `.gitignore` 対象なので Git 操作は不要
+- 退避先に残しておけば、後で Asset Store から再 import 不要で復帰できる
 

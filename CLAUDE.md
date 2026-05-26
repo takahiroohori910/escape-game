@@ -82,3 +82,35 @@ NG パターンを踏んだ場合・新しい OK パターンを発見した場�
 ### セーブ/ロード
 - セーブ実行 → Exit Play Mode → Enter Play Mode → ロード確認
 - 新規追加アイテムが SaveManager.allItems に含まれているか確認
+
+## 名前 / アセットパスの参照ルール
+
+- **GameObject 名は `SceneNames.cs`、アセットパスは `AssetPaths.cs` の const 経由**で参照する（`Assets/_Project/Scripts/Core/`）
+- コード内に文字列リテラルを直書きしない（`GameObject.Find("Canvas_Main")` 等は禁止）
+- 新規 Find / LoadAssetAtPath を追加する時は、先に SceneNames / AssetPaths に const を追加してから参照
+- シーン GameObject 名は日本語、コードの const 名は英語（例: `SceneNames.CanvasMain = "メインキャンバス"`）
+- 例外: 動的命名テンプレ (`$"Candle_{i}_Stick"`) は `SceneNames.CandleStickFormat` の format 文字列で持つ
+- 例外: フォントアセット (`NotoSansJP_Fresh.asset`) は TMP 動的アトラスの都合で英数字維持
+
+## OnMouseDown / 3D クリック検知の注意
+
+- **OnMouseDown は UI Raycast を貫通する** — UI ボタンの背後にある 3D Collider が誤発火する
+  - 暫定対処: `if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;` を OnMouseDown 冒頭に
+  - 本来の対処: `IPointerClickHandler` + `Physics Raycaster` に移行（設計改善案 C、未着手）
+- **MonoBehaviour.enabled = false では OnMouseDown を必ずしも止められない** — 同一 GameObject 上の Collider 自体を `enabled = false` にする、もしくはコンポーネントごと削除する
+- **複数の Collider があるオブジェクトに注意** — BoxCollider だけ無効化しても MeshCollider 経由で発火する（過去 SG_Canvas で事故）
+- **Overview 中はエリア内オブジェクトを反応させない** — Interactable と `HoverHighlight` の両方で `RoomViewController.Instance.IsOverview` チェックを入れる
+
+## シーン YAML 直接編集の注意
+
+`.unity` ファイルを直接編集する場合（重複名 GameObject の選別削除など、MCP では難しいとき）：
+
+- **コンポーネント削除は m_Component リスト除去 + 定義ブロック完全削除の両方が必須**。定義だけ残すと Unity がロード時に自動再付与する
+- **fileID の型を必ず確認**してから削除（`!u!23` = MeshRenderer、`!u!64` = MeshCollider 等。詳細は [.claude/unity-patterns.md](.claude/unity-patterns.md) の「シーン YAML 直接編集の安全手順」）
+- 編集後の Unity ダイアログでは **必ず Reload を選ぶ**（Ignore すると次の save_scene で編集が消える）
+
+## 大型未使用アセットの退避
+
+- `Library/Artifacts` が肥大化したら、まず `Assets/` 配下の大型外部 Asset Pack（Furniture Mega Pack 等）を疑う
+- 退避手順は [.claude/unity-patterns.md](.claude/unity-patterns.md) の「大型未使用アセットの管理」を参照
+- 退避先は `/Users/ohori/Documents/Claude/EscapeGame_Archive/`
