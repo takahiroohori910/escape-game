@@ -18,7 +18,8 @@ namespace EscapeGame.EditorTools
         static readonly string[] TargetNames = {
             "AltarPanel", "DisplayCabinetPanel", "NumberPadPanel",
             "NotePanel", "NoteOverlay",
-            "CodeDisplay", "ButtonGrid", "TitleText"
+            "CodeDisplay", "ButtonGrid", "TitleText",
+            "ItemDetailPanel", "ClearOverlay", "SubText"
         };
 
         [MenuItem("EscapeGame/Cleanup/Duplicate UI Panels (Dry Run)")]
@@ -43,6 +44,7 @@ namespace EscapeGame.EditorTools
             ProtectFromUI<HintUI>(keep, "panel");
             ProtectFromUI<BookshelfStatusUI>(keep, "panel");
             ProtectFromUI<GameClearUI>(keep, "overlay");
+            ProtectFromUI<GameClearUI>(keep, "subText");
 
             int deleted = 0;
             foreach (var name in TargetNames)
