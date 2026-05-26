@@ -57566,7 +57566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80b314fe8207746509b015f9abffdd19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Game.ClockInteractable
-  requiredArea: 0
+  requiredArea: 2
 --- !u!114 &1587133352
 MonoBehaviour:
   m_ObjectHideFlags: 0

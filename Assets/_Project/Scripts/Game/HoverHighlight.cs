@@ -22,6 +22,8 @@ namespace EscapeGame.Game
         private void OnMouseEnter()
         {
             if (TitleUI.Instance != null && TitleUI.Instance.IsShowing) return;
+            // Overview ではエリア内オブジェクトは操作対象外なので、誤解を招かないよう光らせない
+            if (RoomViewController.Instance != null && RoomViewController.Instance.IsOverview) return;
             if (hasRenderer) rend.material.color = highlightColor;
         }
 
