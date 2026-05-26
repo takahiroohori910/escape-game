@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using EscapeGame.Core;
 
 namespace EscapeGame.Game
@@ -28,6 +29,9 @@ namespace EscapeGame.Game
         {
             if (!RoomViewController.Instance.IsOverview) return;
             if (TitleUI.Instance != null && TitleUI.Instance.IsShowing) return;
+            // UI 上のクリック（ヒントボタン等）が OnMouseDown を貫通して
+            // 誤って 3D エリア遷移を起こすのを防ぐ
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
             if (!string.IsNullOrEmpty(requiredFlag) && !FlagManager.Instance.HasFlag(requiredFlag))
             {
