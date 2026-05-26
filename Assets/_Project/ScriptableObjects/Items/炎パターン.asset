@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c5077413529bf4d388d3a4531316d99f, type: 3}
-  m_Name: FlamePattern
+  m_Name: "\u708E\u30D1\u30BF\u30FC\u30F3"
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.ItemData
   itemId: flame_pattern
   itemName: "\u874B\u677F"

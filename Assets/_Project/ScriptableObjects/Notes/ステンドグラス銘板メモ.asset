@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
-  m_Name: NoteStainedGlassPlaque
+  m_Name: "\u30B9\u30C6\u30F3\u30C9\u30B0\u30E9\u30B9\u9298\u677F\u30E1\u30E2"
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
   noteId: notestainedglassplaque
   title: "\u30B9\u30C6\u30F3\u30C9\u30B0\u30E9\u30B9\u89E3\u8AAC\u677F"

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d04f0b16063a147238212eb9b1362762, type: 3}
-  m_Name: NoteCabinetHint
+  m_Name: "\u98DF\u5668\u68DA\u30D2\u30F3\u30C8\u30E1\u30E2"
   m_EditorClassIdentifier: Assembly-CSharp::EscapeGame.Core.NoteData
   noteId: notecabinethint
   title: "\u71ED\u53F0\u306E\u7BA1\u7406\u66F8"
