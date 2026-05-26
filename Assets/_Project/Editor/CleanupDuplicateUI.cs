@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using EscapeGame.Core;
 using EscapeGame.Game;
 
 namespace EscapeGame.EditorTools
@@ -119,7 +120,7 @@ namespace EscapeGame.EditorTools
             }
 
             int fontCount = 0;
-            var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
+            var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetPaths.Font_NotoSansJP_Fresh);
             if (jpFont != null)
             {
                 var allTMP = Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);

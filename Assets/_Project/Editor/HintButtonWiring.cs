@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.UI;
+using EscapeGame.Core;
 using EscapeGame.Game;
 
 public class HintButtonWiring
@@ -18,7 +19,7 @@ public class HintButtonWiring
 
     static void WireHintButton()
     {
-        var btn = GameObject.Find("HintButton")?.GetComponent<Button>();
+        var btn = GameObject.Find(SceneNames.HintButton)?.GetComponent<Button>();
         if (btn == null) { Debug.LogError("[ButtonWiring] HintButton が見つかりません"); return; }
 
         var hintUI = Object.FindAnyObjectByType<HintUI>();
@@ -36,7 +37,7 @@ public class HintButtonWiring
 
     static void WireMenuButton()
     {
-        var menuGO = GameObject.Find("MenuButton");
+        var menuGO = GameObject.Find(SceneNames.MenuButton);
         if (menuGO == null) { Debug.LogError("[ButtonWiring] MenuButton が見つかりません"); return; }
 
         var btn = menuGO.GetComponent<Button>();

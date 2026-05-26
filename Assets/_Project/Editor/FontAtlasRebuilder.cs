@@ -5,6 +5,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using TMPro;
+using EscapeGame.Core;
 
 public static class FontAtlasRebuilder
 {
@@ -247,7 +248,7 @@ public static class FontAtlasRebuilder
     [MenuItem("EscapeGame/Font/Enable All TMP")]
     public static void EnableAllTMP()
     {
-        var asset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
+        var asset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetPaths.Font_NotoSansJP_Fresh);
         if (asset == null) { Debug.LogError("[FontRebuild] Fresh asset not found"); return; }
         var subs = AssetDatabase.LoadAllAssetsAtPath("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
         var matSub = subs.OfType<Material>().FirstOrDefault();

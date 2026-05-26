@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
+using EscapeGame.Core;
 
 namespace EscapeGame.EditorTools
 {
@@ -112,7 +113,7 @@ namespace EscapeGame.EditorTools
             toDelete.RemoveAll(go => go.name == "S2_01");
             foreach (var go in toDelete) { Object.DestroyImmediate(go); removed++; }
 
-            var keep = GameObject.Find("S2_01");
+            var keep = GameObject.Find(SceneNames.S2_01);
             if (keep != null)
                 keep.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
@@ -183,7 +184,7 @@ namespace EscapeGame.EditorTools
         [MenuItem("EscapeGame/Setup/Fill Shelves With S2_01 Copies")]
         public static void FillShelvesWithS201()
         {
-            var src = GameObject.Find("S2_01");
+            var src = GameObject.Find(SceneNames.S2_01);
             if (src == null) { Debug.LogError("[BSPrefab] S2_01 が見つかりません"); return; }
             var mr = src.GetComponent<MeshRenderer>();
             if (mr == null) return;
@@ -192,16 +193,16 @@ namespace EscapeGame.EditorTools
             float spacing = bookW + 0.03f;
 
             // 棚内寸（BS_Left/BS_Right から動的に取得して、Move Bookshelf Right 実行後でも動く）
-            var bsL = GameObject.Find("BS_Left");
-            var bsR = GameObject.Find("BS_Right");
+            var bsL = GameObject.Find(SceneNames.BS_Left);
+            var bsR = GameObject.Find(SceneNames.BS_Right);
             if (bsL == null || bsR == null) { Debug.LogError("[BSPrefab] BS_Left/BS_Right 未検出"); return; }
             float xMin = bsL.transform.position.x + 0.10f;
             float xMax = bsR.transform.position.x - 0.10f;
 
             // 段ごとの Y 位置（棚板の上面）。BS_Shelf1/2 と BS_Bottom から動的に取得
-            var bsBottom = GameObject.Find("BS_Bottom");
-            var bsShelf1 = GameObject.Find("BS_Shelf1");
-            var bsShelf2 = GameObject.Find("BS_Shelf2");
+            var bsBottom = GameObject.Find(SceneNames.BS_Bottom);
+            var bsShelf1 = GameObject.Find(SceneNames.BS_Shelf1);
+            var bsShelf2 = GameObject.Find(SceneNames.BS_Shelf2);
             float yLower = bsBottom != null ? bsBottom.transform.position.y + 0.05f : 0f;
             float yMiddle = bsShelf1 != null ? bsShelf1.transform.position.y + 0.04f : 1.035f;
             float yUpper  = bsShelf2 != null ? bsShelf2.transform.position.y + 0.04f : 2.035f;

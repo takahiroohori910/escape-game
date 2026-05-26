@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
+using EscapeGame.Core;
 
 namespace EscapeGame.EditorTools
 {
@@ -14,7 +15,7 @@ namespace EscapeGame.EditorTools
         [MenuItem("EscapeGame/Setup/Split BackWall For Door")]
         public static void Run()
         {
-            var bw = GameObject.Find("BackWall");
+            var bw = GameObject.Find(SceneNames.BackWall);
             if (bw == null) { Debug.LogError("[BackWallSplit] BackWall が見つかりません"); return; }
 
             // 元 BackWall のマテリアル取得（同じ質感で分割壁を作る）

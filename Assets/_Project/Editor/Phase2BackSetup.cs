@@ -20,9 +20,9 @@ public class Phase2BackSetup
             Debug.LogError("[P2Back] Edit mode で実行してください（Play mode 中は変更が保存されません）");
             return;
         }
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) { Debug.LogError("[P2Back] Canvas_Main が見つかりません"); return; }
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         if (managers == null) { Debug.LogError("[P2Back] Managers が見つかりません"); return; }
 
         FixCanvasScaler(canvas);
@@ -130,7 +130,7 @@ public class Phase2BackSetup
     private static void SetupHintButton(GameObject canvas, GameObject managers)
     {
         // 既存の HintButton を削除して再作成
-        var existingBtn = GameObject.Find("HintButton");
+        var existingBtn = GameObject.Find(SceneNames.HintButton);
         if (existingBtn != null) Object.DestroyImmediate(existingBtn);
 
         // 「？」ボタン（右上）
@@ -149,7 +149,7 @@ public class Phase2BackSetup
             EditorUtility.SetDirty(hintBtn.gameObject);
 
             // HintPanel の panel フィールドを確認・配線
-            var hintPanelGO = GameObject.Find("HintPanel");
+            var hintPanelGO = GameObject.Find(SceneNames.HintPanel);
             if (hintPanelGO != null)
             {
                 var so = new SerializedObject(hintUI);
@@ -225,7 +225,7 @@ public class Phase2BackSetup
     // ── タイトルUI ────────────────────────────────────────────────
     private static void SetupTitleUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("TitleOverlay");
+        var existing = GameObject.Find(SceneNames.TitleOverlay);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // 全画面オーバーレイ
@@ -289,7 +289,7 @@ public class Phase2BackSetup
     // ── タイマーUI ────────────────────────────────────────────────
     private static void SetupTimerUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("TimerText");
+        var existing = GameObject.Find(SceneNames.TimerText);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // ゲーム中タイマー（右上）
@@ -303,7 +303,7 @@ public class Phase2BackSetup
         timerTmp.alignment = TextAlignmentOptions.Right;
 
         // クリア画面タイム表示（ClearOverlay内）
-        var clearOverlay = GameObject.Find("ClearOverlay");
+        var clearOverlay = GameObject.Find(SceneNames.ClearOverlay);
         TextMeshProUGUI clearTimeTmp = null;
         if (clearOverlay != null)
         {
@@ -349,7 +349,7 @@ public class Phase2BackSetup
     private static void SetupClearUI(GameObject canvas, GameObject managers)
     {
         // TitleOverlay 削除時に消えた ClearOverlay を再作成
-        var existing = GameObject.Find("ClearOverlay");
+        var existing = GameObject.Find(SceneNames.ClearOverlay);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var overlay = CreateUIObj("ClearOverlay", canvas, 0, 0);
@@ -394,7 +394,7 @@ public class Phase2BackSetup
         var clearUI = Object.FindAnyObjectByType<GameClearUI>();
         if (clearUI == null) { Debug.LogWarning("[P2Back] GameClearUI が見つかりません"); return; }
 
-        var clearOverlay = GameObject.Find("ClearOverlay");
+        var clearOverlay = GameObject.Find(SceneNames.ClearOverlay);
         Button backBtn = null;
         TextMeshProUGUI subTmp = null;
 
@@ -440,7 +440,7 @@ public class Phase2BackSetup
     // ── 壁掛け時計をデスクエリアの壁に配置 ───────────────────────────
     private static void SetupClockObject()
     {
-        var existing = GameObject.Find("Clock");
+        var existing = GameObject.Find(SceneNames.Clock);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var clock = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -460,7 +460,7 @@ public class Phase2BackSetup
     // ── 暖炉マントル上の写真（本の並び順ヒント）を配置 ────────────────
     private static void SetupFireplacePhotoObject()
     {
-        var existing = GameObject.Find("FireplacePhoto");
+        var existing = GameObject.Find(SceneNames.FireplacePhoto);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // 写真フレーム（マントル上）

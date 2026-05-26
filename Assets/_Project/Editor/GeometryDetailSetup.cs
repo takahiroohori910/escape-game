@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class GeometryDetailSetup
 {
@@ -25,7 +26,7 @@ public class GeometryDetailSetup
     // ── 机：脚・引き出し追加 ─────────────────────────────────────────────
     private static void SetupDesk()
     {
-        var deskTop = GameObject.Find("DeskTop");
+        var deskTop = GameObject.Find(SceneNames.DeskTop);
         if (deskTop == null) { Debug.LogWarning("[Geo] DeskTop が見つかりません"); return; }
 
         Vector3 topPos   = deskTop.transform.position;
@@ -73,7 +74,7 @@ public class GeometryDetailSetup
     // ── 書棚：背板・装飾 ─────────────────────────────────────────────────
     private static void SetupBookshelf()
     {
-        var bs = GameObject.Find("Bookshelf");
+        var bs = GameObject.Find(SceneNames.Bookshelf);
         if (bs == null) { Debug.LogWarning("[Geo] Bookshelf が見つかりません"); return; }
 
         Vector3 bsPos   = bs.transform.position;
@@ -129,7 +130,7 @@ public class GeometryDetailSetup
         string[] parts = { "Chair_Seat", "Chair_Back", "Chair_Leg_FL", "Chair_Leg_FR", "Chair_Leg_BL", "Chair_Leg_BR" };
         foreach (var p in parts) Remove(p);
 
-        var deskTop = GameObject.Find("DeskTop");
+        var deskTop = GameObject.Find(SceneNames.DeskTop);
         if (deskTop == null) return;
 
         Vector3 deskPos = deskTop.transform.position;

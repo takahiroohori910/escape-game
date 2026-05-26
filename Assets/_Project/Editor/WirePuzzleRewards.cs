@@ -14,9 +14,9 @@ public class WirePuzzleRewards
 
         var so = new SerializedObject(wirer);
         so.FindProperty("phoneCordItem").objectReferenceValue =
-            AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/PhoneCord.asset");
+            AssetDatabase.LoadAssetAtPath<ItemData>(AssetPaths.Item_PhoneCord);
         so.FindProperty("circuitBoardItem").objectReferenceValue =
-            AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/CircuitBoard.asset");
+            AssetDatabase.LoadAssetAtPath<ItemData>(AssetPaths.Item_CircuitBoard);
         so.ApplyModifiedProperties();
 
         EditorUtility.SetDirty(wirer);

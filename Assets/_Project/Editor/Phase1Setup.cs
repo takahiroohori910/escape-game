@@ -24,11 +24,11 @@ public class Phase1Setup
     // ── パズル報酬 ─────────────────────────────────────────────────
     static void SetupRewards()
     {
-        var phoneCord     = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/PhoneCord.asset");
-        var circuitBoard  = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/CircuitBoard.asset");
+        var phoneCord     = AssetDatabase.LoadAssetAtPath<ItemData>(AssetPaths.Item_PhoneCord);
+        var circuitBoard  = AssetDatabase.LoadAssetAtPath<ItemData>(AssetPaths.Item_CircuitBoard);
 
-        WireReward(GameObject.Find("Bookshelf"),  phoneCord,    Object.FindAnyObjectByType<BookshelfPuzzle>()?.OnSolved);
-        WireRewardDesk(GameObject.Find("DeskTop"), circuitBoard);
+        WireReward(GameObject.Find(SceneNames.Bookshelf),  phoneCord,    Object.FindAnyObjectByType<BookshelfPuzzle>()?.OnSolved);
+        WireRewardDesk(GameObject.Find(SceneNames.DeskTop), circuitBoard);
     }
 
     static void WireReward(GameObject go, ItemData item, UnityEngine.Events.UnityEvent evt)
@@ -55,10 +55,10 @@ public class Phase1Setup
     // ── 本棚ステータスUI ──────────────────────────────────────────
     static void SetupBookshelfUI()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) return;
 
-        var existing = GameObject.Find("BookshelfStatusPanel");
+        var existing = GameObject.Find(SceneNames.BookshelfStatusPanel);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var panel = CreateUIObject("BookshelfStatusPanel", canvas, 400, 100);
@@ -79,7 +79,7 @@ public class Phase1Setup
         status.fontSize = 32; status.color = Color.white;
         status.alignment = TextAlignmentOptions.Center;
 
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         var ui = managers.GetComponent<BookshelfStatusUI>() ?? managers.AddComponent<BookshelfStatusUI>();
         var so = new SerializedObject(ui);
         so.FindProperty("panel").objectReferenceValue          = panel;
@@ -93,14 +93,14 @@ public class Phase1Setup
     // ── インベントリUI ────────────────────────────────────────────
     static void SetupInventoryUI()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) return;
 
-        var existing = GameObject.Find("InventoryBar");
+        var existing = GameObject.Find(SceneNames.InventoryBar);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // スロットプレハブ（非アクティブで保持）
-        var prefabParent = GameObject.Find("_Prefabs") ?? new GameObject("_Prefabs");
+        var prefabParent = GameObject.Find(SceneNames.Prefabs) ?? new GameObject(SceneNames.Prefabs);
         prefabParent.SetActive(false);
         var slotPrefab = CreateUIObject("SlotPrefab", prefabParent, 70, 70);
         AddImage(slotPrefab, new Color(0.15f, 0.15f, 0.15f, 0.7f));
@@ -123,7 +123,7 @@ public class Phase1Setup
         layout.childAlignment = TextAnchor.MiddleCenter;
         layout.childControlWidth = false; layout.childControlHeight = false;
 
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         var ui = managers.GetComponent<InventoryUI>() ?? managers.AddComponent<InventoryUI>();
         var so = new SerializedObject(ui);
         so.FindProperty("slotPrefab").objectReferenceValue    = slotPrefab;
@@ -136,10 +136,10 @@ public class Phase1Setup
     // ── ゲームクリアUI ────────────────────────────────────────────
     static void SetupGameClearUI()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) return;
 
-        var existing = GameObject.Find("ClearOverlay");
+        var existing = GameObject.Find(SceneNames.ClearOverlay);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var overlay = CreateUIObject("ClearOverlay", canvas, 0, 0);
@@ -162,7 +162,7 @@ public class Phase1Setup
         sub.fontSize = 22; sub.color = Color.white;
         sub.alignment = TextAlignmentOptions.Center;
 
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         var ui = managers.GetComponent<GameClearUI>() ?? managers.AddComponent<GameClearUI>();
         var so = new SerializedObject(ui);
         so.FindProperty("overlay").objectReferenceValue   = overlay;

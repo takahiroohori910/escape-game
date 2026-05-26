@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class FireplaceSetup
 {
@@ -11,9 +12,9 @@ public class FireplaceSetup
         if (cubeMesh == null) { Debug.LogError("[FireplaceSetup] Cube.fbx が見つかりません"); return; }
 
         // 既存マテリアル取得（部屋と同じものを流用）
-        var wallMat  = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/WallMaterial.mat");
-        var deskMat  = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/DeskMaterial.mat");
-        var floorMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/FloorMaterial.mat");
+        var wallMat  = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.Mat_Wall);
+        var deskMat  = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.Mat_Desk);
+        var floorMat = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.Mat_Floor);
 
         SetMesh("FireplaceFrame", cubeMesh, wallMat  ?? CreateGray(new Color(0.35f, 0.22f, 0.12f)));
         SetMesh("Mantle",         cubeMesh, deskMat  ?? CreateGray(new Color(0.45f, 0.30f, 0.18f)));

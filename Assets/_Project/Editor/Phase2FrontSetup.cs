@@ -12,9 +12,9 @@ public class Phase2FrontSetup
     [MenuItem("EscapeGame/Setup/Rebuild ItemDetailUI")]
     public static void RebuildItemDetailUI()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) { Debug.LogError("[P2Front] Canvas_Main が見つかりません"); return; }
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         if (managers == null) { Debug.LogError("[P2Front] Managers が見つかりません"); return; }
         SetupItemDetailUI(canvas, managers);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -24,9 +24,9 @@ public class Phase2FrontSetup
     [MenuItem("EscapeGame/Setup/Phase2 Front Setup")]
     public static void Run()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) { Debug.LogError("[P2Front] Canvas_Main が見つかりません"); return; }
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         if (managers == null) { Debug.LogError("[P2Front] Managers が見つかりません"); return; }
 
         SetupHintUI(canvas, managers);
@@ -47,7 +47,7 @@ public class Phase2FrontSetup
     // ── ヒントUI ─────────────────────────────────────────────────
     private static void SetupHintUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("HintPanel");
+        var existing = GameObject.Find(SceneNames.HintPanel);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var panel = CreateUIObj("HintPanel", canvas, 1000, 72);
@@ -77,7 +77,7 @@ public class Phase2FrontSetup
     // ── ポップアップUI ──────────────────────────────────────────
     private static void SetupPopupUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("PopupPanel");
+        var existing = GameObject.Find(SceneNames.PopupPanel);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var panel = CreateUIObj("PopupPanel", canvas, 640, 110);
@@ -108,7 +108,7 @@ public class Phase2FrontSetup
     // ── メモUI ───────────────────────────────────────────────────
     private static void SetupNoteUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("NoteOverlay");
+        var existing = GameObject.Find(SceneNames.NoteOverlay);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // 全画面暗幕
@@ -177,11 +177,11 @@ public class Phase2FrontSetup
     // ── アイテム詳細UI ────────────────────────────────────────────
     private static void SetupItemDetailUI(GameObject canvas, GameObject managers)
     {
-        var existing = GameObject.Find("ItemDetailPanel");
+        var existing = GameObject.Find(SceneNames.ItemDetailPanel);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // 日本語フォント（NotoSansJP_Fresh）を読み込む。なければ警告のみで続行（英字 LiberationSans フォールバック）
-        var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Fonts/NotoSansJP_Fresh.asset");
+        var jpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetPaths.Font_NotoSansJP_Fresh);
         if (jpFont == null) Debug.LogWarning("[P2Front] NotoSansJP_Fresh.asset が見つかりません。日本語が□表示になる可能性があります");
 
         // パネルを少し大きくしてアイコンを収容
@@ -345,7 +345,7 @@ public class Phase2FrontSetup
     {
         var clearUI = Object.FindAnyObjectByType<GameClearUI>();
         if (clearUI == null) return;
-        var subText = GameObject.Find("SubText");
+        var subText = GameObject.Find(SceneNames.SubText);
         if (subText == null) return;
 
         var tmp = subText.GetComponent<TextMeshProUGUI>();

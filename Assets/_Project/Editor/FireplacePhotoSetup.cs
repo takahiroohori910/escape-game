@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class FireplacePhotoSetup
 {
@@ -19,7 +20,7 @@ public class FireplacePhotoSetup
                               "PhotoBook_Blue","PhotoBook_Red","PhotoBook_Green","PhotoHeader" };
         foreach (var n in oldNames) Kill(n);
 
-        var photo = GameObject.Find("FireplacePhoto");
+        var photo = GameObject.Find(SceneNames.FireplacePhoto);
         if (photo == null) { Debug.LogError("[PhotoSetup] FireplacePhoto が見つかりません"); return; }
 
         // 額縁：ルートキューブをダークウッドに

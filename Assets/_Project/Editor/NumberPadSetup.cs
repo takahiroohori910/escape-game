@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using EscapeGame.Core;
 using EscapeGame.Game;
 using TMPro;
 using UnityEditor;
@@ -10,11 +11,11 @@ public class NumberPadSetup
     [MenuItem("EscapeGame/Setup/Create NumberPad UI")]
     public static void CreateNumberPadUI()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) { Debug.LogError("[NPSetup] Canvas_Main が見つかりません"); return; }
 
         // 既存パネル削除
-        var existing = GameObject.Find("NumberPadPanel");
+        var existing = GameObject.Find(SceneNames.NumberPadPanel);
         if (existing != null) Object.DestroyImmediate(existing);
 
         // ── パネル ───────────────────────────────────────────────
@@ -59,7 +60,7 @@ public class NumberPadSetup
         }
 
         // ── NumberPadUI コンポーネント（Managers に追加）──────────
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         if (managers == null) { Debug.LogError("[NPSetup] Managers が見つかりません"); return; }
         var ui = managers.GetComponent<NumberPadUI>() ?? managers.AddComponent<NumberPadUI>();
         var so = new SerializedObject(ui);

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class SafeSetup
 {
@@ -9,10 +10,10 @@ public class SafeSetup
     {
         if (Application.isPlaying) { Debug.LogError("[Safe] Edit mode で実行してください"); return; }
 
-        var existing = GameObject.Find("DeskSafe");
+        var existing = GameObject.Find(SceneNames.DeskSafe);
         if (existing != null) Object.DestroyImmediate(existing);
 
-        var deskTop = GameObject.Find("DeskTop");
+        var deskTop = GameObject.Find(SceneNames.DeskTop);
         Vector3 dp = deskTop != null ? deskTop.transform.position : new Vector3(0f, 0.9f, 0.5f);
 
         // 金庫本体

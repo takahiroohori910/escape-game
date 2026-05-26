@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class VisualUpgradeSetup
 {
@@ -29,7 +30,7 @@ public class VisualUpgradeSetup
     // ── ライティング ───────────────────────────────────────────────────────
     private static void UpgradeLighting()
     {
-        var lightGO = GameObject.Find("Directional Light");
+        var lightGO = GameObject.Find(SceneNames.DirectionalLight);
         if (lightGO == null) return;
         var light = lightGO.GetComponent<Light>();
         if (light == null) return;
@@ -49,7 +50,7 @@ public class VisualUpgradeSetup
     // ── 暖炉そばのポイントライト ────────────────────────────────────────────
     private static void AddFireplaceLight()
     {
-        var existing = GameObject.Find("FireplacePointLight");
+        var existing = GameObject.Find(SceneNames.FireplacePointLight);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var go    = new GameObject("FireplacePointLight");
@@ -111,7 +112,7 @@ public class VisualUpgradeSetup
     // ── 暖炉の炉内部（暗い開口部） ──────────────────────────────────────────
     private static void AddFireplaceOpening()
     {
-        var existing = GameObject.Find("FireplaceOpening");
+        var existing = GameObject.Find(SceneNames.FireplaceOpening);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var box = GameObject.CreatePrimitive(PrimitiveType.Cube);

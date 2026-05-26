@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 public class ClockReplacementSetup
 {
@@ -11,7 +12,7 @@ public class ClockReplacementSetup
         if (Application.isPlaying) { Debug.LogError("[Clock3D] Edit mode で実行してください"); return; }
 
         // 既存Clockを削除
-        var old = GameObject.Find("Clock");
+        var old = GameObject.Find(SceneNames.Clock);
         if (old != null) Object.DestroyImmediate(old);
 
         // 文字盤テクスチャ生成・保存

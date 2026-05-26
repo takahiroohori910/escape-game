@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using EscapeGame.Core;
 
 public class PostProcessSetup
 {
@@ -21,7 +22,7 @@ public class PostProcessSetup
 
     private static void SetupVolume()
     {
-        var existing = GameObject.Find("GlobalPostProcessVolume");
+        var existing = GameObject.Find(SceneNames.GlobalPostProcessVolume);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var go = new GameObject("GlobalPostProcessVolume");

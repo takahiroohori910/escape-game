@@ -19,7 +19,7 @@ namespace EscapeGame.EditorTools
         [MenuItem("EscapeGame/Setup/Show Furniture Candidates")]
         public static void ShowFurnitureCandidates()
         {
-            var prev = GameObject.Find("FurnitureCandidates");
+            var prev = GameObject.Find(SceneNames.FurnitureCandidates);
             if (prev != null) Object.DestroyImmediate(prev);
             var root = new GameObject("FurnitureCandidates");
 
@@ -51,7 +51,7 @@ namespace EscapeGame.EditorTools
         [MenuItem("EscapeGame/Setup/Clear Furniture Candidates")]
         public static void ClearFurnitureCandidates()
         {
-            var prev = GameObject.Find("FurnitureCandidates");
+            var prev = GameObject.Find(SceneNames.FurnitureCandidates);
             if (prev != null) Object.DestroyImmediate(prev);
             Debug.Log("[ChestSetup] 候補をクリアしました");
         }
@@ -97,7 +97,7 @@ namespace EscapeGame.EditorTools
                 DisableIfExists(n);
 
             // 既存 Chest を破棄して再構築
-            var prev = GameObject.Find("Chest");
+            var prev = GameObject.Find(SceneNames.Chest);
             if (prev != null) Object.DestroyImmediate(prev);
 
             var chestRoot  = BuildChest(symbolTexs, symbolNames);
@@ -121,7 +121,7 @@ namespace EscapeGame.EditorTools
         static GameObject BuildChest(Texture2D[] symbolTexs, string[] symbolNames)
         {
             // 候補表示が残っていたら自動撤去（選定後の清掃）
-            var candidates = GameObject.Find("FurnitureCandidates");
+            var candidates = GameObject.Find(SceneNames.FurnitureCandidates);
             if (candidates != null) Object.DestroyImmediate(candidates);
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CHEST_PREFAB_PATH);
@@ -237,7 +237,7 @@ namespace EscapeGame.EditorTools
             var anchors = GameObject.Find(PARENT);
             if (anchors == null) anchors = new GameObject(PARENT);
 
-            var existing = GameObject.Find("ChestPoint");
+            var existing = GameObject.Find(SceneNames.ChestPoint);
             if (existing != null) Object.DestroyImmediate(existing);
 
             var pt = new GameObject("ChestPoint");

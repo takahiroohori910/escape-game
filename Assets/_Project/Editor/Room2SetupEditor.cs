@@ -25,7 +25,7 @@ public class Room2SetupEditor : EditorWindow
         WireRoom2UIs();
         CreateRoom2UIPanels();
 
-        EditorUtility.SetDirty(GameObject.Find("RoomViewController"));
+        EditorUtility.SetDirty(GameObject.Find(SceneNames.RoomViewController));
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
         UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
         Debug.Log("[Room2Setup] 完了！");
@@ -37,14 +37,14 @@ public class Room2SetupEditor : EditorWindow
     {
         if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
 
-        var room2Root = GameObject.Find("Room2");
+        var room2Root = GameObject.Find(SceneNames.Room2);
         if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
 
-        var existing = GameObject.Find("R2_CandelabraRoot");
+        var existing = GameObject.Find(SceneNames.R2_CandelabraRoot);
         if (existing != null) Object.DestroyImmediate(existing);
-        var existingZone = GameObject.Find("R2_ClickZone_Candelabra");
+        var existingZone = GameObject.Find(SceneNames.R2_ClickZone_Candelabra);
         if (existingZone != null) Object.DestroyImmediate(existingZone);
-        var existingPuzzle = GameObject.Find("CandelabraPuzzle");
+        var existingPuzzle = GameObject.Find(SceneNames.CandelabraPuzzle);
         if (existingPuzzle != null) Object.DestroyImmediate(existingPuzzle);
 
         var matGold   = GetOrCreateMatURP("Mat_R2_Gold",   new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
@@ -62,18 +62,18 @@ public class Room2SetupEditor : EditorWindow
     {
         if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
 
-        var room2Root = GameObject.Find("Room2");
+        var room2Root = GameObject.Find(SceneNames.Room2);
         if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
 
-        var existing = GameObject.Find("R2_StainedGlassRoot");
+        var existing = GameObject.Find(SceneNames.R2_StainedGlassRoot);
         if (existing != null) Object.DestroyImmediate(existing);
-        var existingZone = GameObject.Find("R2_ClickZone_StainedGlass");
+        var existingZone = GameObject.Find(SceneNames.R2_ClickZone_StainedGlass);
         if (existingZone != null) Object.DestroyImmediate(existingZone);
 
         var matWood = GetOrCreateMatURP("Mat_R2_Wood", new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
 
         // ScriptableObject の参照を取り直す（メニュー実行時は CreateScriptableObjects 呼ばないため）
-        noteStainedGlassPlaque = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteStainedGlassPlaque.asset");
+        noteStainedGlassPlaque = AssetDatabase.LoadAssetAtPath<NoteData>(AssetPaths.Note_StainedGlassPlaque);
 
         BuildStainedGlass(room2Root, matWood);
         UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -97,21 +97,21 @@ public class Room2SetupEditor : EditorWindow
         if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
         if (!GitGuard.RequireCleanGit("Rebuild DisplayCabinet")) return;
 
-        var room2Root = GameObject.Find("Room2");
+        var room2Root = GameObject.Find(SceneNames.Room2);
         if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
 
-        var existing = GameObject.Find("R2_DisplayCabinetRoot");
+        var existing = GameObject.Find(SceneNames.R2_DisplayCabinetRoot);
         if (existing != null) Object.DestroyImmediate(existing);
-        var existingZone = GameObject.Find("R2_ClickZone_Cabinet");
+        var existingZone = GameObject.Find(SceneNames.R2_ClickZone_Cabinet);
         if (existingZone != null) Object.DestroyImmediate(existingZone);
         // 旧テンキーパネルが残っていれば消す
-        var oldPanel = GameObject.Find("DisplayCabinetPanel");
+        var oldPanel = GameObject.Find(SceneNames.DisplayCabinetPanel);
         if (oldPanel != null) Object.DestroyImmediate(oldPanel);
 
         // ヒントノートだけ参照を取り直す
-        noteCabinetHint = AssetDatabase.LoadAssetAtPath<NoteData>("Assets/_Project/ScriptableObjects/Notes/NoteCabinetHint.asset");
+        noteCabinetHint = AssetDatabase.LoadAssetAtPath<NoteData>(AssetPaths.Note_CabinetHint);
 
-        var matDarkWood = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wood_Dark.mat")
+        var matDarkWood = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_WoodDark)
                           ?? GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
         var matGold     = GetOrCreateMatURP("Mat_R2_Gold",  new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matStone    = GetOrCreateMatURP("Mat_R2_Stone", new Color(0.45f,0.40f,0.36f), 0f, 0.12f);
@@ -285,7 +285,7 @@ public class Room2SetupEditor : EditorWindow
     // ─────────────────────────────────────────
     static void CreateRoom2CameraPoints()
     {
-        var anchors = GameObject.Find("CameraAnchors");
+        var anchors = GameObject.Find(SceneNames.CameraAnchors);
         if (anchors == null) { Debug.LogError("CameraAnchorsが見つかりません"); return; }
 
         // Overview2: 高い位置から部屋全体を見渡す（入口付近・高め）
@@ -316,12 +316,12 @@ public class Room2SetupEditor : EditorWindow
         if (rvc == null) { Debug.LogError("RoomViewControllerが見つかりません"); return; }
 
         var so = new SerializedObject(rvc);
-        so.FindProperty("overview2Point").objectReferenceValue      = GameObject.Find("Overview2Point")?.transform;
-        so.FindProperty("stainedGlassPoint").objectReferenceValue   = GameObject.Find("StainedGlassPoint")?.transform;
-        so.FindProperty("displayCabinetPoint").objectReferenceValue = GameObject.Find("DisplayCabinetPoint")?.transform;
-        so.FindProperty("candelabraPoint").objectReferenceValue     = GameObject.Find("CandelabraPoint")?.transform;
-        so.FindProperty("portraitPoint").objectReferenceValue       = GameObject.Find("PortraitPoint")?.transform;
-        so.FindProperty("altarPoint").objectReferenceValue          = GameObject.Find("AltarPoint")?.transform;
+        so.FindProperty("overview2Point").objectReferenceValue      = GameObject.Find(SceneNames.Overview2Point)?.transform;
+        so.FindProperty("stainedGlassPoint").objectReferenceValue   = GameObject.Find(SceneNames.StainedGlassPoint)?.transform;
+        so.FindProperty("displayCabinetPoint").objectReferenceValue = GameObject.Find(SceneNames.DisplayCabinetPoint)?.transform;
+        so.FindProperty("candelabraPoint").objectReferenceValue     = GameObject.Find(SceneNames.CandelabraPoint)?.transform;
+        so.FindProperty("portraitPoint").objectReferenceValue       = GameObject.Find(SceneNames.PortraitPoint)?.transform;
+        so.FindProperty("altarPoint").objectReferenceValue          = GameObject.Find(SceneNames.AltarPoint)?.transform;
         so.ApplyModifiedProperties();
 
         Debug.Log("[Room2Setup] カメラポイント設定完了");
@@ -362,7 +362,7 @@ public class Room2SetupEditor : EditorWindow
 
     static void ResetCameraPointInternal(string name)
     {
-        var anchors = GameObject.Find("CameraAnchors");
+        var anchors = GameObject.Find(SceneNames.CameraAnchors);
         if (anchors == null) { Debug.LogError("CameraAnchorsが見つかりません"); return; }
         var defaults = GetCameraPointDefault(name);
         if (!defaults.HasValue) { Debug.LogError($"[Reset] {name} は未知のカメラポイント"); return; }
@@ -391,7 +391,7 @@ public class Room2SetupEditor : EditorWindow
     public static void ResetAllCameraPoints()
     {
         if (!GitGuard.RequireCleanGit("Reset All Camera Points")) return;
-        var anchors = GameObject.Find("CameraAnchors");
+        var anchors = GameObject.Find(SceneNames.CameraAnchors);
         if (anchors == null) { Debug.LogError("CameraAnchorsが見つかりません"); return; }
         foreach (var n in new[] { "Overview2Point", "StainedGlassPoint", "DisplayCabinetPoint",
                                   "CandelabraPoint", "PortraitPoint", "AltarPoint" })
@@ -432,7 +432,7 @@ public class Room2SetupEditor : EditorWindow
     // ─────────────────────────────────────────
     static void CreateRoom2Geometry()
     {
-        var existing = GameObject.Find("Room2");
+        var existing = GameObject.Find(SceneNames.Room2);
         if (existing != null) Object.DestroyImmediate(existing);
         foreach (var n in new[] { "PortraitPuzzle", "CandelabraPuzzle" })
         {
@@ -445,17 +445,17 @@ public class Room2SetupEditor : EditorWindow
 
         // ── マテリアル定義 ──
         // 壁・床・天井は Room1 のテクスチャ付き Material（Generated/）を共有して質感を揃える
-        var matWall      = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wall.mat")
+        var matWall      = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_Wall)
                           ?? GetOrCreateMatURP("Mat_R2_Wall",      new Color(0.22f,0.18f,0.14f), 0f, 0.06f);
         var matWallLight = GetOrCreateMatURP("Mat_R2_WallLight",  new Color(0.18f,0.14f,0.11f), 0f, 0.08f);
-        var matFloor     = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Floor.mat")
+        var matFloor     = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_Floor)
                           ?? GetOrCreateMatURP("Mat_R2_Floor",     new Color(0.28f,0.18f,0.10f), 0f, 0.12f);
         var matFloorTile = GetOrCreateMatURP("Mat_R2_FloorTile", new Color(0.16f,0.13f,0.10f), 0f, 0.20f);
-        var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Ceiling.mat")
+        var matCeiling   = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_Ceiling)
                           ?? GetOrCreateMatURP("Mat_R2_Ceiling",   new Color(0.85f,0.82f,0.76f), 0f, 0.05f);
         var matWood      = GetOrCreateMatURP("Mat_R2_Wood",      new Color(0.30f,0.18f,0.08f), 0f, 0.18f);
         // 食器棚など暗木材は Room1 のテクスチャ付き Material（worn_planks）を共有
-        var matDarkWood  = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_Wood_Dark.mat")
+        var matDarkWood  = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_WoodDark)
                           ?? GetOrCreateMatURP("Mat_R2_DarkWood",  new Color(0.18f,0.10f,0.04f), 0f, 0.22f);
         var matGold      = GetOrCreateMatURP("Mat_R2_Gold",      new Color(0.85f,0.68f,0.12f), 0.9f, 0.78f);
         var matGoldDull  = GetOrCreateMatURP("Mat_R2_GoldDull",  new Color(0.70f,0.55f,0.10f), 0.7f, 0.55f);
@@ -612,7 +612,7 @@ public class Room2SetupEditor : EditorWindow
 
         // 4連アーチ窓のテクスチャ画像を貼った Quad（肖像画パズルのヒント：左から指輪→剣→王冠→書物）
         var matWindow = GetOrCreateMatURP("Mat_R2_Window4Arches", Color.white, 0f, 0.1f);
-        var windowTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/_Project/Textures/Window_4Arches.png");
+        var windowTex = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetPaths.Tex_Window_4Arches);
         if (windowTex != null)
         {
             var unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
@@ -648,7 +648,7 @@ public class Room2SetupEditor : EditorWindow
     static void BuildDisplayCabinet(GameObject room2Root, Material matDarkWood, Material matGold, Material matStone)
     {
         // 食器棚のガラスは透明な Mat_WindowGlass を使用（内部の食器が見えるように）
-        var matGlass = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Generated/Mat_WindowGlass.mat")
+        var matGlass = AssetDatabase.LoadAssetAtPath<Material>(AssetPaths.MatGen_WindowGlass)
                        ?? GetOrCreateMatURP("Mat_R2_Glass", new Color(0.35f,0.42f,0.55f), 0.85f, 0.20f);
 
         var cabRoot = new GameObject("R2_DisplayCabinetRoot");
@@ -694,7 +694,7 @@ public class Room2SetupEditor : EditorWindow
         var puzzle = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
         // 解錠時に表示するヒントノートを配線（Rebuild DisplayCabinet 単体でも繋がるように）
         if (itemFlamePattern == null)
-            itemFlamePattern = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/ScriptableObjects/Items/FlamePattern.asset");
+            itemFlamePattern = AssetDatabase.LoadAssetAtPath<ItemData>(AssetPaths.Item_FlamePattern);
         if (itemFlamePattern != null) SetPrivate(puzzle, "cabinetHintItem", itemFlamePattern);
         EditorUtility.SetDirty(puzzle);
 
@@ -1133,12 +1133,12 @@ public class Room2SetupEditor : EditorWindow
         if (Application.isPlaying) { Debug.LogError("Edit mode で実行してください"); return; }
         if (!GitGuard.RequireCleanGit("Rebuild Altar")) return;
 
-        var room2Root = GameObject.Find("Room2");
+        var room2Root = GameObject.Find(SceneNames.Room2);
         if (room2Root == null) { Debug.LogError("[Room2Setup] Room2 not found"); return; }
 
-        var existing = GameObject.Find("R2_AltarRoot");
+        var existing = GameObject.Find(SceneNames.R2_AltarRoot);
         if (existing != null) Object.DestroyImmediate(existing);
-        var existingZone = GameObject.Find("R2_ClickZone_Altar");
+        var existingZone = GameObject.Find(SceneNames.R2_ClickZone_Altar);
         if (existingZone != null) Object.DestroyImmediate(existingZone);
 
         var matStone     = GetOrCreateMatURP("Mat_R2_Stone",     new Color(0.45f,0.40f,0.36f), 0f, 0.12f);
@@ -1329,7 +1329,7 @@ public class Room2SetupEditor : EditorWindow
         var cabinet = Object.FindAnyObjectByType<DisplayCabinetPuzzle>();
         if (cabinet == null)
         {
-            var cabRoot = GameObject.Find("R2_DisplayCabinetRoot");
+            var cabRoot = GameObject.Find(SceneNames.R2_DisplayCabinetRoot);
             if (cabRoot != null)
                 cabinet = cabRoot.GetComponent<DisplayCabinetPuzzle>() ?? cabRoot.AddComponent<DisplayCabinetPuzzle>();
             else Debug.LogWarning("[Room2Setup] R2_DisplayCabinetRoot が見つかりません");
@@ -1339,7 +1339,7 @@ public class Room2SetupEditor : EditorWindow
         var altar = Object.FindAnyObjectByType<AltarPuzzle>();
         if (altar == null)
         {
-            var altarLock = GameObject.Find("Altar_Lock");
+            var altarLock = GameObject.Find(SceneNames.Altar_Lock);
             if (altarLock != null)
                 altar = altarLock.GetComponent<AltarPuzzle>() ?? altarLock.AddComponent<AltarPuzzle>();
             else Debug.LogWarning("[Room2Setup] Altar_Lockが見つかりません");
@@ -1532,14 +1532,14 @@ public class Room2SetupEditor : EditorWindow
     // ─────────────────────────────────────────
     static void CreateRoom2UIPanels()
     {
-        var canvas = GameObject.Find("Canvas_Main");
+        var canvas = GameObject.Find(SceneNames.CanvasMain);
         if (canvas == null) { Debug.LogError("[Room2Setup] Canvas_Mainが見つかりません"); return; }
-        var managers = GameObject.Find("Managers");
+        var managers = GameObject.Find(SceneNames.Managers);
         if (managers == null) { Debug.LogError("[Room2Setup] Managersが見つかりません"); return; }
 
         // 食器棚はカウンタ式に変更されたため、テンキーパネルは作らない
         // 旧 DisplayCabinetPanel が残っていれば消す
-        var oldCabPanel = GameObject.Find("DisplayCabinetPanel");
+        var oldCabPanel = GameObject.Find(SceneNames.DisplayCabinetPanel);
         if (oldCabPanel != null) Object.DestroyImmediate(oldCabPanel);
 
         var altarUI = managers.GetComponent<AltarUI>() ?? managers.AddComponent<AltarUI>();

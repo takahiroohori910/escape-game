@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using EscapeGame.Core;
 
 public class MansionUpgradeSetup
 {
@@ -159,7 +160,7 @@ public class MansionUpgradeSetup
 
     private static void CreateFireEmber()
     {
-        var existing = GameObject.Find("FireEmber");
+        var existing = GameObject.Find(SceneNames.FireEmber);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var ember = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -184,7 +185,7 @@ public class MansionUpgradeSetup
     private static void UpgradeLighting()
     {
         // ディレクショナルライト：薄暗い夜嵐
-        var dlGO = GameObject.Find("Directional Light");
+        var dlGO = GameObject.Find(SceneNames.DirectionalLight);
         if (dlGO != null)
         {
             var dl = dlGO.GetComponent<Light>();

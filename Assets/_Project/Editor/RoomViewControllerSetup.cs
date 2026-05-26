@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using EscapeGame.Core;
 using EscapeGame.Game;
 using UnityEditor;
 using UnityEngine;
@@ -11,7 +12,7 @@ public class RoomViewControllerSetup
         var rvc = Object.FindAnyObjectByType<RoomViewController>();
         if (rvc == null) { Debug.LogError("[RVCSetup] RoomViewController が見つかりません"); return; }
 
-        var mainCam = GameObject.FindWithTag("MainCamera");
+        var mainCam = GameObject.FindWithTag(SceneNames.Tag_MainCamera);
         if (mainCam == null) { Debug.LogError("[RVCSetup] MainCamera が見つかりません"); return; }
 
         var so = new SerializedObject(rvc);

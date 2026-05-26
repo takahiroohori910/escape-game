@@ -2,6 +2,7 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using EscapeGame.Core;
 
 /// <summary>
 /// 電話・メモ・写真の位置と外観を自然に整える
@@ -26,11 +27,11 @@ public class RepositionSetup
     // ── 電話を机の上に移動 ────────────────────────────────────────────────
     private static void RepositionTelephone()
     {
-        var tel = GameObject.Find("Telephone");
+        var tel = GameObject.Find(SceneNames.Telephone);
         if (tel == null) { Debug.LogWarning("[Repo] Telephone が見つかりません"); return; }
 
         // 机（DeskTop）の位置を基準に
-        var deskTop = GameObject.Find("DeskTop");
+        var deskTop = GameObject.Find(SceneNames.DeskTop);
         Vector3 deskPos = deskTop != null ? deskTop.transform.position : new Vector3(0f, 0.9f, 0.5f);
 
         // 机の左端・上面に配置
@@ -42,7 +43,7 @@ public class RepositionSetup
         ApplyColorMat(tel, new Color(0.10f, 0.10f, 0.10f), "Mat_Telephone");
 
         // 受話器パーツ（見た目の強化）
-        var existing = GameObject.Find("TelephoneHandset");
+        var existing = GameObject.Find(SceneNames.TelephoneHandset);
         if (existing != null) Object.DestroyImmediate(existing);
 
         var handset = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -61,10 +62,10 @@ public class RepositionSetup
     private static void RepositionNotes()
     {
         // 机のメモ：机の中央に広げた紙として
-        var noteDesk = GameObject.Find("NoteOnDesk");
+        var noteDesk = GameObject.Find(SceneNames.NoteOnDesk);
         if (noteDesk != null)
         {
-            var deskTop = GameObject.Find("DeskTop");
+            var deskTop = GameObject.Find(SceneNames.DeskTop);
             Vector3 dp = deskTop != null ? deskTop.transform.position : new Vector3(0f, 0.9f, 0.5f);
             noteDesk.transform.position   = new Vector3(dp.x + 0.2f, dp.y + 0.05f, dp.z);
             noteDesk.transform.localScale = new Vector3(0.30f, 0.005f, 0.22f);
@@ -74,7 +75,7 @@ public class RepositionSetup
         }
 
         // 書棚のメモ：棚の隙間に差し込んだ紙として
-        var noteShelf = GameObject.Find("NoteOnBookshelf");
+        var noteShelf = GameObject.Find(SceneNames.NoteOnBookshelf);
         if (noteShelf != null)
         {
             noteShelf.transform.position   = new Vector3(-4.0f, 2.28f, 5.55f);
@@ -85,7 +86,7 @@ public class RepositionSetup
         }
 
         // 暖炉のメモ：マントルに置かれた封筒/手紙として
-        var noteFireplace = GameObject.Find("NoteOnFireplace");
+        var noteFireplace = GameObject.Find(SceneNames.NoteOnFireplace);
         if (noteFireplace != null)
         {
             noteFireplace.transform.position   = new Vector3(5.2f, 2.38f, 5.72f); // マントル上
@@ -101,7 +102,7 @@ public class RepositionSetup
     // ── 暖炉の写真（本の並び順ヒント）をマントルに自然に配置 ─────────────
     private static void RepositionFireplacePhoto()
     {
-        var photo = GameObject.Find("FireplacePhoto");
+        var photo = GameObject.Find(SceneNames.FireplacePhoto);
         if (photo == null) { Debug.LogWarning("[Repo] FireplacePhoto が見つかりません"); return; }
 
         // マントルに立てかけた額縁として（壁から少し離して視認性確保）

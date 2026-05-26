@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using EscapeGame.Core;
 using EscapeGame.Game;
 using UnityEditor;
 using UnityEngine;
@@ -19,7 +20,7 @@ public class InteractableSetup
         AttachBookInteractable("Book_03", 2);
 
         // ── 絵画 ──────────────────────────────────────────────────
-        var painting = GameObject.Find("Painting");
+        var painting = GameObject.Find(SceneNames.Painting);
         if (painting != null)
         {
             EnsureCollider(painting);
@@ -29,7 +30,7 @@ public class InteractableSetup
         }
 
         // ── 電話 ──────────────────────────────────────────────────
-        var telephone = GameObject.Find("Telephone");
+        var telephone = GameObject.Find(SceneNames.Telephone);
         if (telephone != null)
         {
             EnsureCollider(telephone);
@@ -39,7 +40,7 @@ public class InteractableSetup
         }
 
         // ── MENUボタン ────────────────────────────────────────────
-        var menuButton = GameObject.Find("MenuButton");
+        var menuButton = GameObject.Find(SceneNames.MenuButton);
         if (menuButton != null)
         {
             if (menuButton.GetComponent<BackButton>() == null)
