@@ -9,7 +9,8 @@ body {
 
 #unity-container {
   position: fixed;
-  inset: 0;
+  /* iOS Safari の Safe Area（ノッチ・タブバー・Home Indicator）内に収める */
+  inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   display: flex;
   align-items: center;
   justify-content: center;
