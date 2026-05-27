@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +23,7 @@
       <div id="unity-fullscreen-button"></div>
     </div>
   </div>
-  <script src="Build/EscapeGame.loader.js"></script>
+  <script src="Build/WebGL.loader.js"></script>
   <script>
     var container   = document.querySelector("#unity-container");
     var canvas      = document.querySelector("#unity-canvas");
@@ -31,10 +31,10 @@
     var progressFull= document.querySelector("#unity-progress-bar-full");
     var fullscreenBtn = document.querySelector("#unity-fullscreen-button");
 
-    // モバイルでは画面全体に表示
+    // Safe Area 内の container サイズに Canvas を合わせる（iOS ノッチ・Home Indicator 対応）
     function resizeCanvas() {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
+      var w = container.clientWidth;
+      var h = container.clientHeight;
       canvas.style.width  = w + "px";
       canvas.style.height = h + "px";
     }
@@ -45,9 +45,9 @@
     });
 
     createUnityInstance(canvas, {
-      dataUrl:            "Build/EscapeGame.data.unityweb",
-      frameworkUrl:       "Build/EscapeGame.framework.js.unityweb",
-      codeUrl:            "Build/EscapeGame.wasm.unityweb",
+      dataUrl:            "Build/WebGL.data.unityweb",
+      frameworkUrl:       "Build/WebGL.framework.js.unityweb",
+      codeUrl:            "Build/WebGL.wasm.unityweb",
       streamingAssetsUrl: "StreamingAssets",
       companyName:        "EscapeGame",
       productName:        "嵐の洋館",
