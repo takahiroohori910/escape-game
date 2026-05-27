@@ -27,8 +27,9 @@ Assets/AssetStoreTools*
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-# Netlify deploy folder は含める
+# Netlify deploy folder は含める（Build/ サブフォルダも明示的に unignore）
 !Builds/WebGL/
+!Builds/WebGL/**
 
 # Local Netlify folder
 .netlify
