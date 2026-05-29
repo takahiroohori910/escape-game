@@ -42,8 +42,9 @@ namespace EscapeGame.Game
             if (!isVisible) return;
 
             // NoteOverlayなど上位UIがレイキャストを遮断していても動作させる
-            if (Mouse.current == null) return;
-            if (!Mouse.current.leftButton.wasPressedThisFrame) return;
+            // Pointer は Mouse / Touchscreen / Pen の共通親。iOS Touch でも反応する
+            if (Pointer.current == null) return;
+            if (!Pointer.current.press.wasPressedThisFrame) return;
             if (!IsPointerOver()) return;
             Execute();
         }
@@ -68,7 +69,7 @@ namespace EscapeGame.Game
         {
             if (rectTransform == null || rootCanvas == null) return false;
             var cam = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : Camera.main;
-            return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Mouse.current.position.ReadValue(), cam);
+            return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Pointer.current.position.ReadValue(), cam);
         }
     }
 }

@@ -37,8 +37,10 @@ namespace EscapeGame.Game
 
         private void Update()
         {
+            if (!overlay.activeSelf) return;
             if (showedThisFrame) { showedThisFrame = false; return; }
-            if (overlay.activeSelf && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) Hide();
+            // Pointer は Mouse / Touchscreen / Pen の共通親。iOS Touch でも close できる
+            if (Pointer.current != null && Pointer.current.press.wasPressedThisFrame) Hide();
         }
     }
 }

@@ -28,12 +28,14 @@ namespace EscapeGame.Game
         {
             if (RoomViewController.Instance == null) return;
             if (RoomViewController.Instance.CurrentArea != RoomArea.Chest) return;
-            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
+            // Pointer は Mouse / Touchscreen / Pen の共通親。iOS Touch でも反応する
+            var pointer = Pointer.current;
+            if (pointer == null || !pointer.press.wasPressedThisFrame) return;
 
             var cam = Camera.main;
             if (cam == null) return;
 
-            var ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            var ray = cam.ScreenPointToRay(pointer.position.ReadValue());
             if (!Physics.Raycast(ray, out var hit)) return;
             if (hit.transform != transform) return;
 

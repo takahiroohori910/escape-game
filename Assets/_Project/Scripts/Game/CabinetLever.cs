@@ -15,15 +15,16 @@ namespace EscapeGame.Game
 
         private void Update()
         {
-            if (Mouse.current == null) return;
-            if (!Mouse.current.leftButton.wasPressedThisFrame) return;
+            // Pointer は Mouse / Touchscreen / Pen の共通親。iOS Touch でも反応する
+            var pointer = Pointer.current;
+            if (pointer == null || !pointer.press.wasPressedThisFrame) return;
             if (RoomViewController.Instance == null) return;
             if (RoomViewController.Instance.CurrentArea != RoomArea.DisplayCabinet) return;
             if (puzzle == null || puzzle.IsSolved) return;
 
             var cam = Camera.main;
             if (cam == null) return;
-            var ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            var ray = cam.ScreenPointToRay(pointer.position.ReadValue());
             if (!Physics.Raycast(ray, out var hit)) return;
             if (hit.transform != transform) return;
 
