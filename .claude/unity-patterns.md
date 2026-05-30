@@ -46,6 +46,18 @@ NGパターンを踏んだときは即このファイルに追記すること。
 |---|---|---|
 | 新規 .cs ファイル作成直後に即 Recompile | `Assets/Refresh` → Recompile の順 | ファイルが Unity に認識される前にコンパイルが走るとクラスが見つからない |
 
+### WebGL Build（モバイル・iOS Safari 対応）
+
+| NG | OK | 理由 |
+|---|---|---|
+| MCP `execute_menu_item` 経由で `BuildPipeline.BuildPlayer` を呼ぶ Editor スクリプトをトリガー | **Unity Editor で手動 Build**（File → Build Profiles → Web → Build） | MCP 経由トリガーだと `WebGL.data.unityweb` 書き出しまでで停止し、index.html や他ファイルが生成されないバグあり（Unity 6 + URP）。複数回試行しても同じ症状 |
+| Build ダイアログで Save As 欄に既存値を消さずに上書きで入力 | **Save As 欄をクリアしてから `WebGL`（先頭スペース絶対なし）と入力** | 4 回連続で先頭スペース付き ` WebGL/` フォルダが生成された事故あり。Cmd+Shift+G で `/Users/.../Builds/` まで移動後、Save As 欄を全選択 (Cmd+A) → 削除 → `WebGL` 入力が安全 |
+| `Mouse.current.leftButton.wasPressedThisFrame` で 3D クリック検知 | `Pointer.current.press.wasPressedThisFrame`（Mouse / Touchscreen / Pen 共通親） | `Mouse.current` のみだと **iOS Safari の Touch 入力が無視される**。Pointer.current で統一すれば Mouse + Touch 両方で動く。Unity Input System 経由 Button の onClick は問題ないが、3D Collider + Raycast 系は要 Pointer 対応 |
+| `Mouse.current.position.ReadValue()` で座標取得 | `Pointer.current.position.ReadValue()` | 同上の理由で Touch を取りこぼす |
+| Unity 6 WebGL でデフォルト `webGLCompressionFormat: 0`（Disabled）| **Brotli (1) + DecompressionFallback ON + InitialMemory 256MB** | iOS Safari は Brotli 非対応なのでフォールバック必須。InitialMemory 32MB だと起動時 Memory growth が頻発して遅い |
+| Unity WebGL Canvas のスケール調整に `Match: 0.5` のまま | iPhone 横持ちなら **`Match: 0` (Width 基準)**、Reference Resolution は 1280x720 だと UI が小さすぎ → **1160x650 程度** が体感ベスト | 横持ちは横幅機種差（844〜1334）が大きいため Width 基準が UI 配置が安定。Reference 1.1〜1.2 倍程度 (1160x650) でタップ領域が Apple HIG 推奨 44pt に近づく |
+| WebGL テンプレートの `#unity-container { inset: 0 }` のみ | `inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)` + `<meta viewport ... viewport-fit=cover>` | iOS Safari の Dynamic Island / Home Indicator 領域に UI が隠れる対策。`resizeCanvas` も `container.clientWidth/Height` 基準にする |
+
 ### Unity 6 API
 
 | NG（旧API） | OK（Unity 6） | 理由 |
